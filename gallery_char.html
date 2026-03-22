@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Галерея персонажей | Genshin Impact</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gallery-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            padding: 80px 30px 40px;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        .top-left-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            pointer-events: auto;
+        }
+        
+        .back-btn {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 100, 0.6);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(66, 93, 108, 0.95), rgba(28, 45, 58, 0.95));
+            border-color: #ffcd7e;
+        }
+
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .gallery-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFE6B0, #D9B48B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        /* Сетка карточек */
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .character-card {
+            background: linear-gradient(145deg, #1e2a32, #0f1a1f);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255, 215, 150, 0.3);
+            position: relative;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 215, 150, 0.6);
+        }
+        
+        .character-card.locked {
+            filter: brightness(0.6) grayscale(0.3);
+            opacity: 0.8;
+        }
+        
+        .character-image {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .character-info {
+            padding: 12px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .character-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #FFE2B5;
+            margin-bottom: 4px;
+        }
+        
+        .character-title {
+            font-size: 0.7rem;
+            color: #b9cfec;
+        }
+        
+        .rarity-badge {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 5px black;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .rarity-UR { border-top: 4px solid #FF6B6B; }
+        .rarity-SSR { border-top: 4px solid #FFB347; }
+        .rarity-SR { border-top: 4px solid #c98eff; }
+        
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            color: #FFE2B5;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            border: 1px solid rgba(255, 215, 150, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast-message.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .gallery-container { padding: 70px 20px 30px; }
+            .characters-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+            .character-name { font-size: 0.85rem; }
+            .character-title { font-size: 0.6rem; }
+            .back-btn { padding: 6px 16px; font-size: 0.75rem; }
+            .top-bar { padding: 0 20px; top: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-container">
+        <div class="gallery-title">
+            <h1>✦ ГАЛЕРЕЯ ПЕРСОНАЖЕЙ ✦</h1>
+        </div>
+        <div id="charactersGrid" class="characters-grid">
+            <!-- Карточки будут вставлены через JS -->
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="top-left-group">
+            <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+        </div>
+    </div>
+
+    <div id="toastMessage" class="toast-message"></div>
+
+    <script>
+        // ==================== КОНФИГУРАЦИЯ ПЕРСОНАЖЕЙ ====================
+        // Дублируем структуру из баннера, но только персонажей (без оружия)
+        // При добавлении новых персонажей сюда нужно добавить их с полями id, name, title, type, image, rarity
+        const CHARACTERS_CONFIG = {
+            UR: [
+                { id: "zhongli", name: "Чжун Ли", title: "Контракт Архонта", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/82/Персонаж_Чжун_Ли_Карточка.jpg/revision/latest?cb=20230407150112&path-prefix=ru" },
+                { id: "venti", name: "Венти", title: "Бард Анемо", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/3/32/Персонаж_Венти_Карточка.jpg/revision/latest?cb=20210302090739&path-prefix=ru" },
+                { id: "raiden", name: "Райдэн Эи", title: "Воплощение грома", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/d/d8/Персонаж_Райдэн_Карточка.jpg/revision/latest?cb=20210722144522&path-prefix=ru" }
+            ],
+            SSR: [
+                { id: "mona", name: "Мона", title: "Звёздное отражение", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/7/70/Персонаж_Мона_Карточка.jpg/revision/latest?cb=20210330130549&path-prefix=ru" },
+                { id: "keqing", name: "Кэ Цин", title: "Раккаты грома", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/8d/Персонаж_Кэ_Цин_Карточка.jpg/revision/latest?cb=20230407200423&path-prefix=ru" },
+                { id: "diluc", name: "Дилюк", title: "Пылающий рыцарь", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/f/f7/Персонаж_Дилюк_Карточка.jpg/revision/latest?cb=20201020013558&path-prefix=ru" },
+                { id: "qiqi", name: "Ци Ци", title: "Ледяное возрождение", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/49/Персонаж_Ци_Ци_Карточка.jpg/revision/latest?cb=20201021085924&path-prefix=ru" }
+            ],
+            SR: [
+                { id: "xiangling", name: "Сян Лин", title: "Повар-искатель", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/2/25/Персонаж_Сян_Лин_Карточка.jpg/revision/latest?cb=20201023204757&path-prefix=ru" },
+                { id: "ningguang", name: "Нин Гуан", title: "Жемчужница", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/a/a6/Персонаж_Нин_Гуан_Карточка.jpg/revision/latest?cb=20240329163428&path-prefix=ru" },
+                { id: "bennett", name: "Беннет", title: "Искатель приключений", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/4e/Персонаж_Беннет_Карточка.jpg/revision/latest?cb=20201021042837&path-prefix=ru" }
+            ]
+        };
+
+        // Собираем всех персонажей в один массив
+        let allCharacters = [];
+        for (let rarity in CHARACTERS_CONFIG) {
+            allCharacters.push(...CHARACTERS_CONFIG[rarity]);
+        }
+
+        const STORAGE_KEY = 'genshin_game_data';
+        let collectedIds = []; // массив id полученных персонажей
+
+        function loadCollectedCharacters() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    collectedIds = data.collectedCharacters || [];
+                } catch(e) {}
+            }
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('charactersGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            
+            // Сортируем по редкости: UR → SSR → SR
+            const order = { UR: 0, SSR: 1, SR: 2 };
+            const sorted = [...allCharacters].sort((a, b) => order[a.rarity] - order[b.rarity]);
+            
+            for (let char of sorted) {
+                const isOwned = collectedIds.includes(char.id);
+                const card = document.createElement('div');
+                card.className = `character-card ${!isOwned ? 'locked' : ''} rarity-${char.rarity}`;
+                
+                card.innerHTML = `
+                    <img src="${char.image}" class="character-image" alt="${char.name}" onerror="this.src='https://picsum.photos/id/1/400/711'">
+                    <div class="character-info">
+                        <div class="character-name">${char.name}</div>
+                        <div class="character-title">${char.title}</div>
+                        <div class="rarity-badge">${char.rarity}</div>
+                    </div>
+                    ${!isOwned ? '<div class="lock-overlay">🔒</div>' : ''}
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastMessage');
+            toast.textContent = message;
+            toast.style.background = isError ? 'rgba(100, 50, 50, 0.95)' : 'rgba(0, 0, 0, 0.85)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Навигация
+        document.getElementById('backToHubBtn').addEventListener('click', () => {
+            window.location.href = "index.html";
+        });
+
+        // Функция обновления галереи (загружает данные и перерисовывает)
+function refreshGallery() {
+    loadCollectedCharacters();
+    renderGallery();
+}
+
+// При загрузке страницы
+window.addEventListener('load', refreshGallery);
+// При показе страницы (если она была в кэше браузера)
+window.addEventListener('pageshow', refreshGallery);
+    </script>
+</body>
+</html>

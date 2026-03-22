@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Фарм | Genshin Impact</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .farm-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px; /* уменьшил отступы */
+        }
+
+        .farm-card {
+            position: relative;
+            width: 100%;
+            max-width: 700px; /* чуть уже */
+            background: rgba(10, 20, 30, 0.75);
+            backdrop-filter: blur(16px);
+            border-radius: 40px;
+            padding: 20px 15px; /* уменьшил внутренние отступы */
+            border: 1px solid rgba(255, 215, 150, 0.5);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 20px; /* чуть выше */
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        .top-left-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            pointer-events: auto;
+        }
+        
+        .back-btn {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 100, 0.6);
+            padding: 8px 18px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(66, 93, 108, 0.95), rgba(28, 45, 58, 0.95));
+            border-color: #ffcd7e;
+        }
+        
+        .currency-display {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 100, 0.6);
+            padding: 8px 18px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: auto;
+        }
+        
+        .currency-icon {
+            font-size: 1rem;
+        }
+        
+        .currency-amount {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #FFDFA5;
+        }
+
+        .click-area {
+            margin: 15px auto; /* уменьшил отступ */
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            width: fit-content;
+        }
+        
+        .click-area:active {
+            transform: scale(0.98);
+        }
+        
+        .click-image {
+            width: 100%;
+            max-width: 200px; /* уменьшил размер */
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            border-radius: 24px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 215, 150, 0.6);
+            transition: all 0.2s;
+            display: block;
+        }
+        
+        .click-image:hover {
+            transform: scale(1.02);
+            border-color: #ffcd7e;
+        }
+
+        .info-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 32px;
+            padding: 12px 15px; /* уменьшил отступы */
+            margin-top: 15px;
+        }
+        
+        .info-text {
+            font-size: 1rem;
+            color: #FFE2B5;
+            margin-bottom: 8px;
+        }
+        
+        .click-counter {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #FFDFA5;
+        }
+        
+        .reward-text {
+            font-size: 0.8rem;
+            color: #b9cfec;
+            margin-top: 4px;
+        }
+        
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            color: #FFE2B5;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            border: 1px solid rgba(255, 215, 150, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .toast-message.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .click-image { max-width: 160px; }
+            .info-text { font-size: 0.9rem; }
+            .click-counter { font-size: 1.4rem; }
+            .back-btn, .currency-display { padding: 6px 12px; font-size: 0.7rem; }
+            .currency-amount { font-size: 0.9rem; }
+            .top-bar { padding: 0 15px; top: 15px; }
+            .farm-card { max-width: 90%; padding: 15px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="farm-container">
+        <div class="farm-card">
+            <div class="click-area" id="clickArea">
+                <img src="https://static.wikia.nocookie.net/genshin-impact/images/a/ac/Персонаж_Паймон_Карточка.png/revision/latest?cb=20240329163432&path-prefix=ru" 
+                     alt="Хиличурл" 
+                     class="click-image"
+                     onerror="this.src='https://picsum.photos/id/104/360/640'">
+            </div>
+            <div class="info-panel">
+                <div class="info-text">✨ КЛИКАЙ ПО ПАЙМОН ✨</div>
+                <div class="click-counter" id="sessionClicks">0</div>
+                <div class="reward-text">+30 примогемов за клик</div>
+                <div class="reward-text">100 кликов = 10 круток (3000 примогемов)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="top-left-group">
+            <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+        </div>
+        <div class="currency-display">
+            <span class="currency-icon">⭐</span>
+            <span class="currency-amount" id="currencyAmount">10000</span>
+            <span>Примогемы</span>
+        </div>
+    </div>
+
+    <div id="toastMessage" class="toast-message"></div>
+
+    <script>
+        const STORAGE_KEY = 'genshin_game_data';
+        let currency = 10000;
+        let sessionClicks = 0;
+        
+        function loadGameData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currency = data.currency ?? 10000;
+                } catch(e) {}
+            }
+            updateCurrencyUI();
+        }
+        
+        function saveGameData() {
+            let fullData = {};
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try { fullData = JSON.parse(saved); } catch(e) {}
+            }
+            fullData.currency = currency;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(fullData));
+        }
+        
+        function updateCurrencyUI() {
+            document.getElementById('currencyAmount').innerText = currency;
+        }
+        
+        function handleClick() {
+            currency += 30;
+            sessionClicks++;
+            updateCurrencyUI();
+            saveGameData();
+            document.getElementById('sessionClicks').innerText = sessionClicks;
+            showToast(`+30 примогемов! (Всего: ${currency})`);
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toastMessage');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1500);
+        }
+        
+        document.getElementById('backToHubBtn').addEventListener('click', () => {
+            saveGameData();
+            window.location.href = "index.html";
+        });
+        
+        const clickArea = document.getElementById('clickArea');
+        clickArea.addEventListener('click', handleClick);
+        clickArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleClick();
+        });
+        
+        loadGameData();
+        document.getElementById('sessionClicks').innerText = sessionClicks;
+        window.addEventListener('beforeunload', () => saveGameData());
+    </script>
+</body>
+</html>

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Молитва | Genshin Impact</title>
+    <style>
+        /* ========== СТИЛИ (как в предыдущей версии, с добавлением анимаций) ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .game-container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        .banner-card {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            background: transparent;
+        }
+        .character-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 0 40px;
+        }
+        .character-frame {
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 16 / 9;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.8), 0 0 0 4px rgba(255,215,150,0.6), 0 0 0 12px rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.3);
+        }
+        .character-frame img { width: 100%; height: 100%; display: block; object-fit: cover; }
+        .top-bar {
+            position: fixed;
+            top: 30px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .top-left-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            pointer-events: auto;
+        }
+        .back-btn {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,200,100,0.6);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .back-btn:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(66,93,108,0.95), rgba(28,45,58,0.95)); border-color: #ffcd7e; }
+        .currency-display {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,200,100,0.6);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .currency-icon { font-size: 1.2rem; }
+        .currency-amount { font-size: 1.2rem; font-weight: 800; color: #FFDFA5; }
+        .gacha-selector {
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 25;
+        }
+        .gacha-option {
+            width: 80px; height: 80px;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .gacha-option img { width: 100%; height: 100%; object-fit: cover; }
+        .gacha-option.active { border: 2px solid #FFD966; box-shadow: 0 0 15px rgba(255,217,102,0.5); transform: scale(1.05); }
+        .counters-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(16px);
+            padding: 12px 32px;
+            border-radius: 80px;
+            border: 1px solid rgba(255,215,150,0.5);
+            z-index: 10;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .counter-item { text-align: center; min-width: 100px; }
+        .counter-label { font-size: 0.7rem; color: #e2cf9e; letter-spacing: 1px; text-transform: uppercase; }
+        .counter-value { font-size: 1.8rem; font-weight: 800; color: #FFDFA5; line-height: 1; }
+        .counter-note { font-size: 0.6rem; color: #9aaec9; }
+        .bottom-right { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 20px; z-index: 20; }
+        .bottom-left { position: fixed; bottom: 30px; left: 30px; display: flex; gap: 15px; z-index: 20; }
+        .action-btn {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,200,100,0.6);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-btn:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(66,93,108,0.95), rgba(28,45,58,0.95)); border-color: #ffcd7e; }
+        .pray-btn {
+            background: radial-gradient(ellipse at 30% 20%, #d4a373, #b87c4f);
+            border: none;
+            padding: 12px 38px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: #fff3e0;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #6b3e1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            border: 1px solid rgba(255,220,120,0.8);
+            min-width: 150px;
+            justify-content: center;
+        }
+        .pray-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #6b3e1a; }
+        .pray-btn.disabled { opacity: 0.6; pointer-events: none; }
+        .danger-btn { background: radial-gradient(ellipse at 30% 30%, rgba(100,50,50,0.95), rgba(60,25,25,0.95)); border-color: rgba(255,100,100,0.5); }
+        
+        /* АНИМАЦИОННЫЙ ОВЕРЛЕЙ */
+        .wish-animation-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.3s ease;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .wish-animation-overlay.active { visibility: visible; opacity: 1; }
+        .animation-container {
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            position: relative;
+            max-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stars-container {
+            position: relative;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+        .star-burst {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #FFD966, #FFB347);
+            border-radius: 50%;
+            opacity: 0;
+            animation: starBurst 0.7s ease-out forwards;
+        }
+        @keyframes starBurst {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(2.2) rotate(180deg); opacity: 0; }
+        }
+        .result-card {
+            background: linear-gradient(145deg, #1e2a32, #0f1a1f);
+            border-radius: 24px;
+            padding: 16px;
+            border: 2px solid;
+            animation: slideInResult 0.4s ease-out forwards;
+        }
+        @keyframes slideInResult {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .result-image {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            border: 2px solid;
+            max-height: 55vh;
+        }
+        .result-name { font-size: 1.2rem; font-weight: bold; margin: 6px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .result-rarity { font-size: 0.85rem; letter-spacing: 2px; font-weight: bold; }
+        .result-type { font-size: 0.7rem; opacity: 0.9; margin-top: 4px; color: #dddddd; }
+        .result-counter { margin-top: 10px; font-size: 0.8rem; color: #FFDEAD; }
+        .result-UR { border-color: #FF6B6B; background: linear-gradient(145deg, #2a1a1a, #1a0f0f); }
+        .result-UR .result-name { color: #FFB5B5; }
+        .result-UR .result-rarity { color: #FF6B6B; }
+        .result-SSR { border-color: #FFB347; background: linear-gradient(145deg, #2a241a, #1a1a1a); }
+        .result-SSR .result-name { color: #FFD966; }
+        .result-SSR .result-rarity { color: #FFB347; }
+        .result-SR { border-color: #c98eff; }
+        .result-SR .result-name { color: #E8D0FF; }
+        .result-SR .result-rarity { color: #c98eff; }
+        .result-R { border-color: #7f8c8d; }
+        .result-R .result-name { color: #FFFFFF; }
+        .result-R .result-rarity { color: #bdc3c7; }
+        
+        .skip-btn-overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: radial-gradient(ellipse at 30% 30%, rgba(100,70,50,0.95), rgba(60,40,30,0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,200,100,0.6);
+            padding: 10px 22px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .skip-btn-overlay:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(130,90,70,0.95), rgba(80,55,45,0.95)); border-color: #ffcd7e; }
+        
+        /* Итоговая сетка 2×5 */
+        .final-results-wrapper {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        .final-results-container {
+            width: 80%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            cursor: default;
+            background: rgba(0,0,0,0.7);
+            border-radius: 32px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,215,150,0.5);
+            pointer-events: auto;
+        }
+        .final-results-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            row-gap: 20px;
+        }
+        .final-result-item {
+            background: rgba(0,0,0,0.7);
+            border-radius: 16px;
+            padding: 10px 8px;
+            text-align: center;
+            transition: transform 0.2s;
+            animation: fadeInScale 0.15s ease-out forwards;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .final-result-item:hover { transform: translateY(-5px); border-color: rgba(255,215,150,0.5); }
+        .final-result-image {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 2px solid;
+        }
+        .final-result-name { font-weight: bold; font-size: 0.8rem; color: #ffffff; white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; }
+        .final-result-rarity { font-size: 0.65rem; margin-top: 4px; font-weight: bold; }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .final-ur { border-color: #FF6B6B; }
+        .final-ur .final-result-name { color: #FFB5B5; }
+        .final-ur .final-result-rarity { color: #FF6B6B; }
+        .final-ssr { border-color: #FFB347; }
+        .final-ssr .final-result-name { color: #FFD966; }
+        .final-ssr .final-result-rarity { color: #FFB347; }
+        .final-sr { border-color: #c98eff; }
+        .final-sr .final-result-name { color: #E8D0FF; }
+        .final-sr .final-result-rarity { color: #c98eff; }
+        .final-r { border-color: #7f8c8d; }
+        .final-r .final-result-name { color: #FFFFFF; }
+        .final-r .final-result-rarity { color: #bdc3c7; }
+        
+        .continue-btn {
+            background: radial-gradient(ellipse at 30% 20%, #d4a373, #b87c4f);
+            border: none;
+            padding: 10px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        /* модальные окна */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.active { visibility: visible; opacity: 1; }
+        .modal-content {
+            background: #131f2ce6;
+            width: 90%;
+            max-width: 750px;
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid #ffcf86;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            color: #FFDEAD;
+            margin-bottom: 18px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #ffcf86;
+            padding-bottom: 8px;
+        }
+        .history-stats {
+            background: #010a0f;
+            padding: 10px;
+            border-radius: 24px;
+            margin: 10px 0;
+            color: #e7cf9e;
+        }
+        .history-list { max-height: 280px; overflow-y: auto; }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #3e3a2e;
+            padding: 6px 5px;
+            font-size: 0.85rem;
+        }
+        .close-modal {
+            background: #8b6b3a;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 50px;
+            color: white;
+            margin-top: 18px;
+            cursor: pointer;
+        }
+        .rates-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.8rem;
+        }
+        .rates-table th {
+            background: #2a241a;
+            color: #FFDEAD;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 2px solid #ffcf86;
+        }
+        .rates-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #4a3e2e;
+            color: #e0d4bc;
+        }
+        .rarity-5-star { color: #FFB347; font-weight: bold; }
+        .rarity-4-star { color: #c98eff; font-weight: bold; }
+        .rarity-3-star { color: #7f8c8d; }
+        .section-title {
+            color: #FFDEAD;
+            margin: 20px 0 10px;
+            font-size: 1.2rem;
+            border-left: 4px solid #ffcf86;
+            padding-left: 12px;
+        }
+        .info-note {
+            background: #1e2a2f;
+            padding: 12px;
+            border-radius: 16px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #b9cfec;
+        }
+        @media (max-width: 768px) {
+            .counters-panel { gap: 15px; padding: 8px 20px; }
+            .counter-item { min-width: 70px; }
+            .counter-value { font-size: 1.3rem; }
+            .pray-btn { padding: 8px 20px; font-size: 0.9rem; min-width: 120px; }
+            .gacha-option { width: 60px; height: 60px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="banner-card">
+        <div class="character-center">
+            <div class="character-frame">
+                <img id="bannerImage" src="" alt="Баннер">
+            </div>
+        </div>
+        <div class="counters-panel" id="countersPanel"></div>
+    </div>
+</div>
+
+<div class="top-bar">
+    <div class="top-left-group">
+        <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+    </div>
+    <div class="currency-display">
+        <span class="currency-icon">⭐</span>
+        <span class="currency-amount" id="currencyAmount">10000</span>
+        <span>Примогемы</span>
+    </div>
+</div>
+
+<div class="gacha-selector">
+    <div class="gacha-option active" id="gachaCharBtn" data-type="char">
+        <img id="gachaCharImg" src="" alt="Персонажи">
+    </div>
+    <div class="gacha-option" id="gachaWeaponBtn" data-type="weapon">
+        <img id="gachaWeaponImg" src="" alt="Оружие">
+    </div>
+</div>
+
+<div class="bottom-left">
+    <button class="action-btn" id="openHistoryBtn">📜 ИСТОРИЯ</button>
+    <button class="action-btn" id="openDetailsBtn">ℹ️ ДЕТАЛИ</button>
+</div>
+<div class="bottom-right">
+    <button class="pray-btn" id="pray1Btn">⭐ 1 РАЗ (300)</button>
+    <button class="pray-btn" id="pay10Btn">✨ 10 РАЗ (3000)</button>
+</div>
+
+<!-- Анимационный оверлей -->
+<div id="wishAnimation" class="wish-animation-overlay">
+    <div class="animation-container">
+        <div class="stars-container" id="starsContainer"></div>
+        <div id="resultContainer"></div>
+    </div>
+    <div id="skipButtonOverlay" class="skip-btn-overlay" style="display: none;">⏩ ПРОПУСТИТЬ</div>
+</div>
+
+<!-- Модальные окна -->
+<div id="historyModal" class="modal"><div class="modal-content"><h3>📖 ИСТОРИЯ МОЛИТВ</h3><div class="history-stats" id="modalStats"></div><div id="fullHistoryList" class="history-list"></div><button class="close-modal" id="closeHistoryBtn">ЗАКРЫТЬ</button></div></div>
+<div id="detailsModal" class="modal"><div class="modal-content"><h3>📊 ШАНСЫ ВЫПАДЕНИЯ</h3><div id="detailsTable"></div><button class="close-modal" id="closeDetailsBtn">ЗАКРЫТЬ</button></div></div>
+
+<script>
+// ==================== КОНФИГУРАТОР ====================
+const GACHA_CONFIG = {
+    bannerImageChar: "https://avatars.mds.yandex.net/i?id=502afb34af82568191379ed1b393b4cf_l-9112075-images-thumbs&n=13",
+    bannerImageWeapon: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=1200&h=675&fit=crop",
+    gachaCharImage: "https://avatars.mds.yandex.net/i?id=502afb34af82568191379ed1b393b4cf_l-9112075-images-thumbs&n=13",
+    gachaWeaponImage: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=200&h=200&fit=crop",
+    startCurrency: 10000,
+    costPerPull: 300,
+    rarities: {
+        UR: { name: "UR", label: "UR", color: "#FF6B6B", chance: 0.1, guarantee: null },
+        SSR: { name: "SSR", label: "SSR", color: "#FFB347", chance: 0.8, guarantee: 90 },
+        SR: { name: "SR", label: "SR", color: "#c98eff", chance: 5.0, guarantee: 10 },
+        R: { name: "R", label: "R", color: "#7f8c8d", chance: 94.1, guarantee: null }
+    },
+    charItems: {
+        UR: [ { id: "paimon", name: "Чжун Ли", title: "Контракт Архонта", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/82/Персонаж_Чжун_Ли_Карточка.jpg/revision/latest?cb=20230407150112&path-prefix=ru" }, { id: "venti", name: "Венти", title: "Бард Анемо", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/3/32/Персонаж_Венти_Карточка.jpg/revision/latest?cb=20210302090739&path-prefix=ru" }, { id: "raiden", name: "Райдэн Эи", title: "Воплощение грома", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/d/d8/Персонаж_Райдэн_Карточка.jpg/revision/latest?cb=20210722144522&path-prefix=ru" } ],
+        SSR: [ { id: "mona", name: "Мона", title: "Звёздное отражение", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/7/70/Персонаж_Мона_Карточка.jpg/revision/latest?cb=20210330130549&path-prefix=ru" }, { id: "keqing", name: "Кэ Цин", title: "Раккаты грома", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/8d/Персонаж_Кэ_Цин_Карточка.jpg/revision/latest?cb=20230407200423&path-prefix=ru" }, { id: "diluc", name: "Дилюк", title: "Пылающий рыцарь", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/f/f7/Персонаж_Дилюк_Карточка.jpg/revision/latest?cb=20201020013558&path-prefix=ru" }, { id: "qiqi", name: "Ци Ци", title: "Ледяное возрождение", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/49/Персонаж_Ци_Ци_Карточка.jpg/revision/latest?cb=20201021085924&path-prefix=ru" } ],
+        SR: [ { id: "xiangling", name: "Сян Лин", title: "Повар-искатель", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/2/25/Персонаж_Сян_Лин_Карточка.jpg/revision/latest?cb=20201023204757&path-prefix=ru" }, { id: "ningguang", name: "Нин Гуан", title: "Жемчужница", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/a/a6/Персонаж_Нин_Гуан_Карточка.jpg/revision/latest?cb=20240329163428&path-prefix=ru" }, { id: "bennett", name: "Беннет", title: "Искатель приключений", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/4e/Персонаж_Беннет_Карточка.jpg/revision/latest?cb=20201021042837&path-prefix=ru" } ],
+        R: [ { id: "traveler_sword", name: "Меч путешественника", type: "Оружие", image: "https://picsum.photos/id/140/400/711" }, { id: "hunter_bow", name: "Лук охотника", type: "Оружие", image: "https://picsum.photos/id/142/400/711" }, { id: "magic_guide", name: "Книга магии", type: "Оружие", image: "https://picsum.photos/id/144/400/711" } ]
+    },
+    weaponItems: {
+        UR: [ { id: "divine_sword", name: "Божественный меч", title: "Клинок бесконечности", type: "Оружие", image: "https://picsum.photos/id/105/400/711" }, { id: "eternal_bow", name: "Вечный лук", title: "Стрела судьбы", type: "Оружие", image: "https://picsum.photos/id/107/400/711" }, { id: "primordial_spear", name: "Изначальное копьё", title: "Копьё первородного", type: "Оружие", image: "https://picsum.photos/id/109/400/711" } ],
+        SSR: [ { id: "skyward_spine", name: "Небесная ось", title: "Копьё возмездия", type: "Оружие", image: "https://picsum.photos/id/114/400/711" }, { id: "aquila_favonia", name: "Аквила Фавония", title: "Меч", type: "Оружие", image: "https://picsum.photos/id/115/400/711" }, { id: "wolfs_gravestone", name: "Волчья погибель", title: "Двуручный меч", type: "Оружие", image: "https://picsum.photos/id/118/400/711" }, { id: "lost_prayer", name: "Утерянная молитва", title: "Катализатор", type: "Оружие", image: "https://picsum.photos/id/119/400/711" } ],
+        SR: [ { id: "sacrificial_sword", name: "Меч Сакрального льда", type: "Оружие", image: "https://picsum.photos/id/132/400/711" }, { id: "favonius_bow", name: "Лук-ловец ветра", type: "Оружие", image: "https://picsum.photos/id/134/400/711" }, { id: "dragons_tale", name: "Гримуар драконьих сказаний", type: "Оружие", image: "https://picsum.photos/id/136/400/711" }, { id: "ritual_sword", name: "Ритуальный меч", type: "Оружие", image: "https://picsum.photos/id/138/400/711" } ],
+        R: [ { id: "traveler_sword", name: "Меч путешественника", type: "Оружие", image: "https://picsum.photos/id/140/400/711" }, { id: "hunter_bow", name: "Лук охотника", type: "Оружие", image: "https://picsum.photos/id/142/400/711" }, { id: "magic_guide", name: "Книга магии", type: "Оружие", image: "https://picsum.photos/id/144/400/711" } ]
+    }
+};
+
+// ==================== КЛЮЧ ДЛЯ ХРАНЕНИЯ ====================
+const STORAGE_KEY = 'genshin_game_data';
+
+// ==================== ОСНОВНАЯ ЛОГИКА ====================
+let currentGachaType = 'char';
+let counters = { SSR: 90, SR: 10 };
+let history = [];
+let currency = GACHA_CONFIG.startCurrency;
+let collectedCharacters = [];
+let collectedWeapons = [];
+let totalPulls = 0;
+
+// Состояние анимации
+let isAnimating = false;
+let currentMultiItems = [];
+let currentMultiIndex = 0;
+let skipRequested = false;
+let isMultiMode = false;
+let showingFinalResults = false;
+
+// Загрузка данных из localStorage
+function loadGameData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            currency = data.currency ?? GACHA_CONFIG.startCurrency;
+            history = data.history ?? [];
+            counters = data.counters ?? { SSR: 90, SR: 10 };
+            collectedCharacters = data.collectedCharacters ?? [];
+            collectedWeapons = data.collectedWeapons ?? [];
+            totalPulls = data.totalPulls ?? 0;
+            currentGachaType = data.currentGachaType ?? 'char';
+        } catch(e) { console.warn(e); }
+    }
+    if (history.length > 90) history = history.slice(0, 90);
+    updateUI();
+}
+
+// Сохранение данных
+function saveGameData() {
+    const gameData = {
+        currency, history, counters, collectedCharacters, collectedWeapons, totalPulls, currentGachaType,
+        lastSave: new Date().toISOString()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
+}
+
+// Обновление UI
+function updateUI() {
+    document.getElementById('currencyAmount').innerText = currency;
+    updateCountersUI();
+    updateHistoryUI();
+    if (currentGachaType === 'char') {
+        document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageChar;
+        document.getElementById('gachaCharBtn').classList.add('active');
+        document.getElementById('gachaWeaponBtn').classList.remove('active');
+    } else {
+        document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageWeapon;
+        document.getElementById('gachaWeaponBtn').classList.add('active');
+        document.getElementById('gachaCharBtn').classList.remove('active');
+    }
+}
+
+function updateCountersUI() {
+    const panel = document.getElementById('countersPanel');
+    panel.innerHTML = '';
+    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+        if (data.guarantee && counters[rarity] !== undefined) {
+            panel.innerHTML += `<div class="counter-item"><div class="counter-label">ДО ГАРАНТА ${rarity}</div><div class="counter-value">${counters[rarity]}</div><div class="counter-note">макс. ${data.guarantee}</div></div>`;
+        }
+    }
+}
+
+function updateHistoryUI() {
+    const stats = {};
+    for (let r of Object.keys(GACHA_CONFIG.rarities)) stats[r] = history.filter(i => i.rarity === r).length;
+    const modalStats = document.getElementById('modalStats');
+    if (modalStats) {
+        let statsText = '';
+        for (let [rarity, count] of Object.entries(stats)) statsText += `${rarity}: ${count}  |  `;
+        modalStats.innerText = statsText.slice(0, -3) + `  |  Всего: ${history.length}`;
+    }
+    const fullHistoryList = document.getElementById('fullHistoryList');
+    if (fullHistoryList) {
+        if (history.length === 0) fullHistoryList.innerHTML = '<div style="padding:12px;text-align:center;color:#aa9e7a;">Пока ничего не выпадало...</div>';
+        else {
+            fullHistoryList.innerHTML = history.map(rec => {
+                const rarityData = GACHA_CONFIG.rarities[rec.rarity];
+                const starIcon = rec.rarity === 'UR' ? '💎' : (rec.rarity === 'SSR' ? '🌟' : (rec.rarity === 'SR' ? '⭐' : '◆'));
+                const gachaIcon = rec.gachaType === 'char' ? '👤' : '⚔️';
+                return `<div class="history-item"><span style="color:${rarityData?.color || '#fff'}">${gachaIcon} ${starIcon} ${rec.name} ${rec.title ? '('+rec.title+')' : ''}</span><span style="color:#bc9a6c;">${rec.timestamp}</span></div>`;
+            }).join('');
+        }
+    }
+}
+
+function getCurrentItems() {
+    return currentGachaType === 'char' ? GACHA_CONFIG.charItems : GACHA_CONFIG.weaponItems;
+}
+
+function getRandomItem(rarity) {
+    const items = getCurrentItems()[rarity];
+    if (!items || items.length === 0) return { name: "Предмет", type: "Предмет", image: "https://picsum.photos/id/1/400/711", rarity: rarity };
+    return { ...items[Math.floor(Math.random() * items.length)], rarity: rarity };
+}
+
+function performWish() {
+    let guaranteedRarity = null;
+    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+        if (data.guarantee && counters[rarity] <= 1) {
+            guaranteedRarity = rarity;
+            break;
+        }
+    }
+    let result;
+    if (guaranteedRarity) {
+        result = getRandomItem(guaranteedRarity);
+        for (let [r, data] of Object.entries(GACHA_CONFIG.rarities)) if (data.guarantee) counters[r] = data.guarantee;
+    } else {
+        const rand = Math.random() * 100;
+        let cumulative = 0, selectedRarity = null;
+        for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+            cumulative += data.chance;
+            if (rand < cumulative) { selectedRarity = rarity; break; }
+        }
+        if (!selectedRarity) selectedRarity = 'R';
+        result = getRandomItem(selectedRarity);
+        for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+            if (data.guarantee) {
+                if (rarity === selectedRarity) counters[rarity] = data.guarantee;
+                else counters[rarity] = Math.max(1, counters[rarity] - 1);
+            }
+        }
+    }
+    const historyItem = { ...result, timestamp: new Date().toLocaleTimeString(), gachaType: currentGachaType };
+    history.unshift(historyItem);
+    if (history.length > 90) history.pop();
+    totalPulls++;
+    if (result.type === "Персонаж") { if (!collectedCharacters.includes(result.id)) collectedCharacters.push(result.id); }
+    else if (result.type === "Оружие") { if (!collectedWeapons.includes(result.id)) collectedWeapons.push(result.id); }
+    saveGameData();
+    updateUI();
+    return result;
+}
+
+// ==================== АНИМАЦИИ ====================
+function showSingleResult(item) {
+    const rarityData = GACHA_CONFIG.rarities[item.rarity];
+    document.getElementById('resultContainer').innerHTML = `
+        <div class="result-card result-${item.rarity}">
+            <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
+            <div class="result-name">${item.name}</div>
+            <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+            <div class="result-type">${item.type}</div>
+            ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
+        </div>
+    `;
+}
+
+function showMultiResult(item) {
+    const rarityData = GACHA_CONFIG.rarities[item.rarity];
+    document.getElementById('resultContainer').innerHTML = `
+        <div class="result-card result-${item.rarity}">
+            <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
+            <div class="result-name">${item.name}</div>
+            <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+            <div class="result-type">${item.type}</div>
+            ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
+            <div class="result-counter">${currentMultiIndex + 1} / ${currentMultiItems.length}</div>
+        </div>
+    `;
+}
+
+function showAllMultiResults() {
+    showingFinalResults = true;
+    let html = `<div class="final-results-wrapper"><div class="final-results-container"><div class="final-results-grid">`;
+    currentMultiItems.forEach(item => {
+        const rarityData = GACHA_CONFIG.rarities[item.rarity];
+        const rarityClass = `final-${item.rarity.toLowerCase()}`;
+        html += `<div class="final-result-item ${rarityClass}">
+            <img src="${item.image}" class="final-result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
+            <div class="final-result-name">${item.name}</div>
+            <div class="final-result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+        </div>`;
+    });
+    html += `</div></div></div>`;
+    document.getElementById('resultContainer').innerHTML = html;
+    document.getElementById('skipButtonOverlay').style.display = 'none';
+}
+
+function nextMultiItem() {
+    if (skipRequested || currentMultiIndex >= currentMultiItems.length) {
+        showAllMultiResults();
+        return;
+    }
+    showMultiResult(currentMultiItems[currentMultiIndex]);
+    currentMultiIndex++;
+}
+
+function startMultiAnimation(items) {
+    currentMultiItems = items;
+    currentMultiIndex = 0;
+    skipRequested = false;
+    isMultiMode = true;
+    showingFinalResults = false;
+    const skipBtn = document.getElementById('skipButtonOverlay');
+    skipBtn.style.display = 'flex';
+    const starsContainer = document.getElementById('starsContainer');
+    starsContainer.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-burst';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 0.3 + 's';
+        starsContainer.appendChild(star);
+    }
+    setTimeout(() => {
+        showMultiResult(currentMultiItems[0]);
+        currentMultiIndex = 1;
+    }, 400);
+}
+
+function startSingleAnimation(item) {
+    isMultiMode = false;
+    showingFinalResults = false;
+    document.getElementById('skipButtonOverlay').style.display = 'none';
+    const starsContainer = document.getElementById('starsContainer');
+    starsContainer.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-burst';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 0.3 + 's';
+        starsContainer.appendChild(star);
+    }
+    setTimeout(() => { showSingleResult(item); }, 400);
+}
+
+function hideAnimationAndFinish() {
+    document.getElementById('wishAnimation').classList.remove('active');
+    document.getElementById('resultContainer').innerHTML = '';
+    document.getElementById('starsContainer').innerHTML = '';
+    document.getElementById('skipButtonOverlay').style.display = 'none';
+    isAnimating = false;
+    isMultiMode = false;
+    showingFinalResults = false;
+    document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.remove('disabled'));
+    currentMultiItems = [];
+    currentMultiIndex = 0;
+    skipRequested = false;
+}
+
+function finishMultiAndSave() {
+    // уже добавлены в историю в performWish, но нужно обновить UI после анимации
+    saveGameData();
+    updateUI();
+    hideAnimationAndFinish();
+}
+
+// Главная функция вызова круток с анимацией
+function doPullsWithAnimation(count) {
+    if (isAnimating) return;
+    const totalCost = count * GACHA_CONFIG.costPerPull;
+    if (currency < totalCost) {
+        alert(`Недостаточно валюты! Нужно ${totalCost} примогемов. У вас ${currency}.`);
+        return;
+    }
+    currency -= totalCost;
+    saveGameData();
+    updateUI();
+
+    const items = [];
+    for (let i = 0; i < count; i++) items.push(performWish()); // уже добавляет в историю, но не обновляет UI до конца анимации
+    isAnimating = true;
+    document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.add('disabled'));
+    document.getElementById('wishAnimation').classList.add('active');
+    if (count === 1) startSingleAnimation(items[0]);
+    else startMultiAnimation(items);
+}
+
+// Клик по оверлею для продолжения (для одиночной и пошаговой)
+document.getElementById('wishAnimation').addEventListener('click', (e) => {
+    if (!isAnimating) return;
+    if (e.target.classList.contains('skip-btn-overlay')) return;
+    if (showingFinalResults) {
+        finishMultiAndSave();
+    } else if (isMultiMode && currentMultiItems.length > 0) {
+        if (currentMultiIndex < currentMultiItems.length) nextMultiItem();
+        else showAllMultiResults();
+    } else if (!isMultiMode) {
+        finishMultiAndSave();
+    }
+});
+
+document.getElementById('skipButtonOverlay').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!isMultiMode || !isAnimating) return;
+    if (showingFinalResults) return;
+    skipRequested = true;
+    showAllMultiResults();
+});
+
+// ==================== НАВИГАЦИЯ И ОБРАБОТЧИКИ ====================
+document.getElementById('backToHubBtn').addEventListener('click', () => { saveGameData(); window.location.href = "index.html"; });
+document.getElementById('gachaCharBtn').addEventListener('click', () => { currentGachaType = 'char'; saveGameData(); updateUI(); updateDetailsModal(); });
+document.getElementById('gachaWeaponBtn').addEventListener('click', () => { currentGachaType = 'weapon'; saveGameData(); updateUI(); updateDetailsModal(); });
+document.getElementById('pray1Btn').addEventListener('click', () => doPullsWithAnimation(1));
+document.getElementById('pay10Btn').addEventListener('click', () => doPullsWithAnimation(10));
+document.getElementById('openHistoryBtn').addEventListener('click', () => { updateHistoryUI(); document.getElementById('historyModal').classList.add('active'); });
+document.getElementById('openDetailsBtn').addEventListener('click', () => { updateDetailsModal(); document.getElementById('detailsModal').classList.add('active'); });
+document.getElementById('closeHistoryBtn').addEventListener('click', () => document.getElementById('historyModal').classList.remove('active'));
+document.getElementById('closeDetailsBtn').addEventListener('click', () => document.getElementById('detailsModal').classList.remove('active'));
+
+function updateDetailsModal() {
+    const container = document.getElementById('detailsTable');
+    const currentItems = getCurrentItems();
+    let html = `<div class="info-note"><strong>🎯 НАСТРОЙКИ БАННЕРА:</strong><br>• Стоимость 1 молитвы: ${GACHA_CONFIG.costPerPull} примогемов<br>• Гарант SSR: 90 молитв | Гарант SR: 10 молитв<br>• Базовые шансы: UR ${GACHA_CONFIG.rarities.UR.chance}% | SSR ${GACHA_CONFIG.rarities.SSR.chance}% | SR ${GACHA_CONFIG.rarities.SR.chance}% | R ${GACHA_CONFIG.rarities.R.chance}%</div>`;
+    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+        const items = currentItems[rarity];
+        if (items && items.length) {
+            html += `<div class="section-title">${data.label} (${rarity}) (${data.chance}%)</div><table class="rates-table"><thead> Utrecht<th>Предмет</th><th>Тип</th><th>Редкость</th> </thead><tbody>`;
+            items.forEach(item => {
+                html += `<tr><td><div style="display:flex;align-items:center;gap:8px"><img src="${item.image}" style="width:36px;height:64px;object-fit:cover;border-radius:8px"> ${item.name} ${item.title ? '('+item.title+')' : ''}</div></td><td>${item.type}</td><td class="rarity-${rarity === 'UR' ? '5-star' : (rarity === 'SSR' ? '5-star' : (rarity === 'SR' ? '4-star' : '3-star'))}">${data.label}</td></tr>`;
+            });
+            html += `</tbody></table>`;
+        }
+    }
+    container.innerHTML = html;
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+});
+
+loadGameData();
+updateDetailsModal();
+</script>
+</body>
+</html>
