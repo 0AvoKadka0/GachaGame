@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Галерея персонажей | Genshin Impact</title>
+    <title>Галерея персонажей</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
 
         body {
             min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            background: #0a1a2a;
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
             position: relative;
         }
@@ -26,7 +26,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.55);
+            background: linear-gradient(135deg, #1a2a3a, #0a121c);
             pointer-events: none;
             z-index: 0;
         }
@@ -97,7 +97,6 @@
             letter-spacing: 2px;
         }
 
-        /* Сетка карточек */
         .characters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -156,9 +155,42 @@
             margin-top: 6px;
             font-size: 0.7rem;
             font-weight: bold;
-            padding: 2px 8px;
+            padding: 4px 10px;
             border-radius: 20px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .character-card.rarity-UR .rarity-badge {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+            text-shadow: 0 0 3px rgba(255, 107, 107, 0.5);
+        }
+
+        .character-card.rarity-SSR .rarity-badge {
+            color: #ffb347;
+            border-color: #ffb347;
+            text-shadow: 0 0 3px rgba(255, 179, 71, 0.5);
+        }
+
+        .character-card.rarity-SR .rarity-badge {
+            color: #c98eff;
+            border-color: #c98eff;
+            text-shadow: 0 0 3px rgba(201, 142, 255, 0.5);
+        }
+
+        .character-card.rarity-R .rarity-badge {
+            color: #bdc3c7;
+            border-color: #bdc3c7;
+        }
+
+        .character-card.locked .rarity-badge {
+            opacity: 0.7;
+            filter: none;
         }
         
         .lock-overlay {
@@ -212,7 +244,7 @@
 <body>
     <div class="gallery-container">
         <div class="gallery-title">
-            <h1>✦ ГАЛЕРЕЯ ПЕРСОНАЖЕЙ ✦</h1>
+            <h1 data-i18n="title">✦ ГАЛЕРЕЯ ПЕРСОНАЖЕЙ ✦</h1>
         </div>
         <div id="charactersGrid" class="characters-grid">
             <!-- Карточки будут вставлены через JS -->
@@ -221,44 +253,82 @@
 
     <div class="top-bar">
         <div class="top-left-group">
-            <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+            <button class="back-btn" id="backToHubBtn" data-i18n="back_btn">← НАЗАД</button>
         </div>
     </div>
 
     <div id="toastMessage" class="toast-message"></div>
 
+    <script async src="/sdk.js" onload="initSDK()"></script>
     <script>
-        // ==================== КОНФИГУРАЦИЯ ПЕРСОНАЖЕЙ ====================
-        // Дублируем структуру из баннера, но только персонажей (без оружия)
-        // При добавлении новых персонажей сюда нужно добавить их с полями id, name, title, type, image, rarity
+        // ========== КОНФИГУРАЦИЯ ==========
+        // Уникальный ключ сохранения (без отсылок)
+        const STORAGE_KEY = 'avokadka_game_data';
+
+        // Локализация (русский и английский)
+        const LOCALE_STRINGS = {
+            ru: {
+                title: "✦ ГАЛЕРЕЯ ПЕРСОНАЖЕЙ ✦",
+                back_btn: "← НАЗАД"
+            },
+            en: {
+                title: "✦ CHARACTER GALLERY ✦",
+                back_btn: "← BACK"
+            }
+        };
+
+        // Список всех персонажей с их редкостями и данными
         const CHARACTERS_CONFIG = {
             UR: [
-                { id: "zhongli", name: "Чжун Ли", title: "Контракт Архонта", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/82/Персонаж_Чжун_Ли_Карточка.jpg/revision/latest?cb=20230407150112&path-prefix=ru" },
-                { id: "venti", name: "Венти", title: "Бард Анемо", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/3/32/Персонаж_Венти_Карточка.jpg/revision/latest?cb=20210302090739&path-prefix=ru" },
-                { id: "raiden", name: "Райдэн Эи", title: "Воплощение грома", type: "Персонаж", rarity: "UR", image: "https://static.wikia.nocookie.net/genshin-impact/images/d/d8/Персонаж_Райдэн_Карточка.jpg/revision/latest?cb=20210722144522&path-prefix=ru" }
+                { id: "victor", name: "Виктóр", title: "Бессмертный", type: "Персонаж", rarity: "UR", image: "./images/characters/victor.png" }
             ],
             SSR: [
-                { id: "mona", name: "Мона", title: "Звёздное отражение", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/7/70/Персонаж_Мона_Карточка.jpg/revision/latest?cb=20210330130549&path-prefix=ru" },
-                { id: "keqing", name: "Кэ Цин", title: "Раккаты грома", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/8d/Персонаж_Кэ_Цин_Карточка.jpg/revision/latest?cb=20230407200423&path-prefix=ru" },
-                { id: "diluc", name: "Дилюк", title: "Пылающий рыцарь", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/f/f7/Персонаж_Дилюк_Карточка.jpg/revision/latest?cb=20201020013558&path-prefix=ru" },
-                { id: "qiqi", name: "Ци Ци", title: "Ледяное возрождение", type: "Персонаж", rarity: "SSR", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/49/Персонаж_Ци_Ци_Карточка.jpg/revision/latest?cb=20201021085924&path-prefix=ru" }
+                { id: "elian", name: "Элиан", title: "Хранительница штормов", type: "Персонаж", rarity: "SSR", image: "./images/characters/elian.png" },
+                { id: "valor", name: "Валтор", title: "Рыцарь рассвета", type: "Персонаж", rarity: "SSR", image: "./images/characters/valor.png" }
             ],
             SR: [
-                { id: "xiangling", name: "Сян Лин", title: "Повар-искатель", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/2/25/Персонаж_Сян_Лин_Карточка.jpg/revision/latest?cb=20201023204757&path-prefix=ru" },
-                { id: "ningguang", name: "Нин Гуан", title: "Жемчужница", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/a/a6/Персонаж_Нин_Гуан_Карточка.jpg/revision/latest?cb=20240329163428&path-prefix=ru" },
-                { id: "bennett", name: "Беннет", title: "Искатель приключений", type: "Персонаж", rarity: "SR", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/4e/Персонаж_Беннет_Карточка.jpg/revision/latest?cb=20201021042837&path-prefix=ru" }
+                { id: "silva", name: "Сильва", title: "Лесная лучница", type: "Персонаж", rarity: "SR", image: "./images/characters/silva.png" },
+                { id: "brun", name: "Брун", title: "Кузнец-воин", type: "Персонаж", rarity: "SR", image: "./images/characters/brun.png" }
+            ],
+            R: [
+                { id: "guard_low", name: "Лоу", title: "Охранник городских ворот", type: "Персонаж", rarity: "R", image: "./images/characters/guard_low.png" }
             ]
         };
 
-        // Собираем всех персонажей в один массив
         let allCharacters = [];
         for (let rarity in CHARACTERS_CONFIG) {
             allCharacters.push(...CHARACTERS_CONFIG[rarity]);
         }
 
-        const STORAGE_KEY = 'genshin_game_data';
-        let collectedIds = []; // массив id полученных персонажей
+        let collectedIds = [];
+        let ysdk = null;
+        let currentLocale = 'ru';
 
+        // ========== ИНИЦИАЛИЗАЦИЯ SDK ==========
+        async function initSDK() {
+            try {
+                ysdk = await YaGames.init();
+                const lang = ysdk.environment.i18n.lang;
+                if (lang && LOCALE_STRINGS[lang]) currentLocale = lang;
+                else currentLocale = 'ru';
+                applyLocale(currentLocale);
+                ysdk.features.LoadingAPI?.ready();
+            } catch(e) {
+                console.warn('SDK init failed:', e);
+            }
+            loadCollectedCharacters();
+            renderGallery();
+        }
+
+        function applyLocale(locale) {
+            const strings = LOCALE_STRINGS[locale] || LOCALE_STRINGS.ru;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (strings[key] !== undefined) el.innerHTML = strings[key];
+            });
+        }
+
+        // ========== РАБОТА С ДАННЫМИ ==========
         function loadCollectedCharacters() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -269,14 +339,28 @@
             }
         }
 
+        // Функция для обновления данных после импорта/сброса (вызывается из index)
+        function refreshData() {
+            loadCollectedCharacters();
+            renderGallery();
+        }
+
+        // Сохраняем изменения (если нужно вызвать из вне)
+        function saveAndSync() {
+            // В этой странице мы только читаем данные, но если потребуется запись, можно добавить вызов window.saveToCloud()
+            if (typeof window.saveToCloud === 'function') {
+                window.saveToCloud();
+            }
+        }
+
+        // ========== ОТРИСОВКА ГАЛЕРЕИ ==========
         function renderGallery() {
             const grid = document.getElementById('charactersGrid');
             if (!grid) return;
             
             grid.innerHTML = '';
-            
-            // Сортируем по редкости: UR → SSR → SR
-            const order = { UR: 0, SSR: 1, SR: 2 };
+            // Сортируем по редкости: UR, SSR, SR, R
+            const order = { UR: 0, SSR: 1, SR: 2, R: 3 };
             const sorted = [...allCharacters].sort((a, b) => order[a.rarity] - order[b.rarity]);
             
             for (let char of sorted) {
@@ -285,10 +369,10 @@
                 card.className = `character-card ${!isOwned ? 'locked' : ''} rarity-${char.rarity}`;
                 
                 card.innerHTML = `
-                    <img src="${char.image}" class="character-image" alt="${char.name}" onerror="this.src='https://picsum.photos/id/1/400/711'">
+                    <img src="${char.image}" class="character-image" alt="${char.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 711'%3E%3Crect width='400' height='711' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFE2B5'%3E%3C/text%3E%3C/svg%3E'">
                     <div class="character-info">
                         <div class="character-name">${char.name}</div>
-                        <div class="character-title">${char.title}</div>
+                        <div class="character-title">${char.title || ''}</div>
                         <div class="rarity-badge">${char.rarity}</div>
                     </div>
                     ${!isOwned ? '<div class="lock-overlay">🔒</div>' : ''}
@@ -305,21 +389,27 @@
             setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        // Навигация
+        // ========== ОБРАБОТЧИКИ ==========
         document.getElementById('backToHubBtn').addEventListener('click', () => {
+            // При возврате сохраняем прогресс (если нужно) – но данные не менялись
+            if (typeof window.saveToCloud === 'function') window.saveToCloud();
             window.location.href = "index.html";
         });
 
-        // Функция обновления галереи (загружает данные и перерисовывает)
-function refreshGallery() {
-    loadCollectedCharacters();
-    renderGallery();
-}
+        // Подписываемся на событие обновления данных (если данные изменятся в другом окне, можно перерисовать)
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                refreshData();
+            }
+        });
 
-// При загрузке страницы
-window.addEventListener('load', refreshGallery);
-// При показе страницы (если она была в кэше браузера)
-window.addEventListener('pageshow', refreshGallery);
+        // Экспортируем функцию для обновления из других страниц
+        window.refreshCharacterGallery = refreshData;
+
+        // Запуск
+        // Данные загрузятся после инициализации SDK, но можно сразу подгрузить и отрисовать
+        loadCollectedCharacters();
+        renderGallery();
     </script>
 </body>
 </html>

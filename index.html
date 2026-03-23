@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Genshin Impact | Главная</title>
+    <title>Странствия | Главная</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body {
             min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            background: #0a1a2a;
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
             position: relative;
         }
@@ -16,7 +16,7 @@
             content: '';
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.55);
+            background: linear-gradient(135deg, #1a2a3a, #0a121c);
             pointer-events: none;
             z-index: 0;
         }
@@ -30,7 +30,7 @@
             z-index: 2;
         }
         .hub-card {
-            background: rgba(10, 20, 30, 0.75);
+            background: rgba(10, 20, 30, 0.85);
             backdrop-filter: blur(16px);
             border-radius: 40px;
             padding: 25px 20px;
@@ -215,47 +215,46 @@
             </div>
             <div style="display: flex; justify-content: center;">
                 <div class="currency-hub">
-                    <span class="currency-icon">⭐</span>
+                    <img src="./images/ui/crystal_icon.png" style="width: 1.2rem; height: 1.2rem; vertical-align: middle;">
                     <span id="hubCurrencyAmount">0</span>
-                    <span>Примогемы</span>
+                    <span class="currency-label">Осколки</span>
                 </div>
             </div>
             <div class="hub-buttons">
                 <button class="hub-btn" id="gotoBannerBtn">
                     <div class="hub-btn-icon">✨</div>
-                    <div class="hub-btn-title">МОЛИТВА</div>
-                    <div class="hub-btn-desc">Получите новых персонажей и оружие</div>
+                    <div class="hub-btn-title" data-i18n="button_banner_title">ПРИЗЫВ</div>
+                    <div class="hub-btn-desc" data-i18n="button_banner_desc">Получите новых персонажей и оружие</div>
                 </button>
                 <button class="hub-btn" id="farmBtn">
-                    <div class="hub-btn-icon">🌾</div>
-                    <div class="hub-btn-title">ФАРМИТЬ КРУТКИ</div>
-                    <div class="hub-btn-desc">Заработайте примогемы</div>
+                    <div class="hub-btn-icon">⛏️</div>
+                    <div class="hub-btn-title" data-i18n="button_farm_title">ПОЛУЧИТЬ ОСКОЛКИ</div>
+                    <div class="hub-btn-desc" data-i18n="button_farm_desc">Заработайте осколки</div>
                 </button>
                 <button class="hub-btn" id="galleryCharBtn">
                     <div class="hub-btn-icon">👥</div>
-                    <div class="hub-btn-title">ГАЛЕРЕЯ ПЕРСОНАЖЕЙ</div>
-                    <div class="hub-btn-desc">Просмотр всех персонажей</div>
+                    <div class="hub-btn-title" data-i18n="button_char_title">ГАЛЕРЕЯ ПЕРСОНАЖЕЙ</div>
+                    <div class="hub-btn-desc" data-i18n="button_char_desc">Просмотр всех персонажей</div>
                 </button>
                 <button class="hub-btn" id="galleryWeaponBtn">
                     <div class="hub-btn-icon">⚔️</div>
-                    <div class="hub-btn-title">ГАЛЕРЕЯ ОРУЖИЯ</div>
-                    <div class="hub-btn-desc">Просмотр всего оружия</div>
-                </button>
-                <button class="hub-btn" id="raidsBtn">
-                    <div class="hub-btn-icon">🏆</div>
-                    <div class="hub-btn-title">РЕЙДЫ</div>
-                    <div class="hub-btn-desc">Сложные испытания</div>
+                    <div class="hub-btn-title" data-i18n="button_weapon_title">ГАЛЕРЕЯ ОРУЖИЯ</div>
+                    <div class="hub-btn-desc" data-i18n="button_weapon_desc">Просмотр всего оружия</div>
                 </button>
                 <button class="hub-btn info-btn" id="infoBtn">
                     <div class="hub-btn-icon">ℹ️</div>
-                    <div class="hub-btn-title">ИНФОРМАЦИЯ</div>
-                    <div class="hub-btn-desc">О проекте и сохранениях</div>
+                    <div class="hub-btn-title" data-i18n="button_info_title">ИНФОРМАЦИЯ</div>
+                    <div class="hub-btn-desc" data-i18n="button_info_desc">О проекте и сохранениях</div>
                 </button>
             </div>
             <div class="save-buttons">
-                <button class="save-btn export-btn" id="exportSaveBtn">💾 ЭКСПОРТ</button>
-                <button class="save-btn import-btn" id="importSaveBtn">📂 ИМПОРТ</button>
-                <button class="save-btn danger-btn" id="clearAllDataBtn">🗑️ ОЧИСТИТЬ ВСЁ</button>
+                <button class="save-btn export-btn" id="exportSaveBtn" data-i18n="button_export">💾 ЭКСПОРТ</button>
+                <button class="save-btn import-btn" id="importSaveBtn" data-i18n="button_import">📂 ИМПОРТ</button>
+                <div id="userInfo" style="display: flex; align-items: center; gap: 12px;">
+                   <span id="userName" style="color: #FFE2B5; font-size: 0.8rem;"></span>
+                   <button class="save-btn" id="yandexAuthBtn" data-i18n="button_auth">🔑 Войти с ЯндексID</button>
+                </div>
+                <button class="save-btn danger-btn" id="clearAllDataBtn" data-i18n="button_reset">🔄️ ПЕРЕЗАГРУЗКА</button>
             </div>
             <input type="file" id="importFileInput" style="display: none;" accept=".json">
         </div>
@@ -263,31 +262,115 @@
     <div id="toastMessage" class="toast-message"></div>
     <div id="infoModal" class="modal">
         <div class="modal-content">
-            <h3>ℹ️ ИНФОРМАЦИЯ</h3>
-            <p>Игра хранится на GitHub, и у разработчика нет возможности разместить её на других серверах. Поэтому данные о вашем аккаунте сохраняются в формате LocalStorage. Рекомендуем сохранить информацию перед очисткой истории браузера.</p>
-            <p>Если вы хотите зайти на свой аккаунт с другого устройства, перенесите сохранённый файл и импортируйте его, нажав соответствующую кнопку.</p>
-            <p style="margin-top:15px; text-align:right;">C уважением,<br>ваши AvoKadka и DeepSeek</p>
-            <button class="close-modal" id="closeInfoBtn">ЗАКРЫТЬ</button>
+            <h3 data-i18n="info_title">ℹ️ О ПРОЕКТЕ</h3>
+            <p data-i18n="info_text1">Это <strong>ранняя версия игры</strong>, которая находится разработке. Впереди много изменений, улучшений и нового контента.</p>
+            <p data-i18n="info_text2">🎭 <strong>Персонажи и оружие</strong>, представленные сейчас, — это лишь первый шаг. В будущем они могут быть заменены, а также появятся совершенно новые герои.</p>
+            <p data-i18n="info_text3">🎨 <strong>Все изображения</strong> в игре созданы с помощью нейросетей, поскольку у меня пока нет художника. Я извиняюсь за возможные стилистические несоответствия и постораюсь со временем улучшить визуальную составляющую.</p>
+            <p data-i18n="info_text4">💾 <strong>Сохранения</strong> хранятся локально в браузере. Вы можете экспортировать свой прогресс и импортировать на другом устройстве.</p>
+            <p data-i18n="info_controls"><strong>Управление:</strong> Нажимайте на кнопки для перехода между разделами. В разделе ПРИЗЫВ – выбирайте баннер и совершайте призывы персонажей или оружия. В разделе ПОЛУЧИТЬ ОСКОЛКИ – кликайте по кристаллу или используйте автокликер за рекламу. Сохранение автоматическое.</p>
+            <p data-i18n="info_text5">✨ <strong>Автор проекта:</strong> AvoKadka</p>
+            <p style="margin-top: 15px; font-size: 0.8rem; color: #b9cfec;" data-i18n="info_thanks">Спасибо, что играете!</p>
+            <button class="close-modal" id="closeInfoBtn" data-i18n="button_close">ЗАКРЫТЬ</button>
         </div>
     </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <h3 data-i18n="confirm_title">⚠️ ПОДТВЕРЖДЕНИЕ</h3>
+            <p id="confirmMessage" data-i18n="confirm_message">Вы уверены, что хотите очистить весь прогресс?</p>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <button id="confirmYesBtn" class="close-modal" style="background: #8b6b3a;" data-i18n="confirm_yes">ДА, ОЧИСТИТЬ</button>
+                <button id="confirmNoBtn" class="close-modal" style="background: #5a3e2a;" data-i18n="confirm_no">ОТМЕНА</button>
+            </div>
+        </div>
+    </div>
+
+    <script async src="/sdk.js" onload="initSDK()"></script>
     <script>
-        let globalCurrency = 0; // Стартовая валюта 0
+        // ========== КОНФИГУРАЦИЯ ==========
+        // Уникальный ключ для хранения данных
+        const STORAGE_KEY = 'avokadka_game_data';
+
+        // Локализационные строки
+        const LOCALE_STRINGS = {
+            ru: {
+                button_banner_title: "ПРИЗЫВ",
+                button_banner_desc: "Получите новых персонажей и оружие",
+                button_farm_title: "ПОЛУЧИТЬ ОСКОЛКИ",
+                button_farm_desc: "Заработайте осколки",
+                button_char_title: "ГАЛЕРЕЯ ПЕРСОНАЖЕЙ",
+                button_char_desc: "Просмотр всех персонажей",
+                button_weapon_title: "ГАЛЕРЕЯ ОРУЖИЯ",
+                button_weapon_desc: "Просмотр всего оружия",
+                button_info_title: "ИНФОРМАЦИЯ",
+                button_info_desc: "О проекте и сохранениях",
+                button_export: "💾 ЭКСПОРТ",
+                button_import: "📂 ИМПОРТ",
+                button_auth: "🔑 Войти",
+                button_reset: "🔄️ ПЕРЕЗАГРУЗКА",
+                info_title: "ℹ️ О ПРОЕКТЕ",
+                info_text1: "Это <strong>ранняя версия игры</strong>, которая находится разработке. Впереди много изменений, улучшений и нового контента.",
+                info_text2: "🎭 <strong>Персонажи и оружие</strong>, представленные сейчас, — это лишь первый шаг. В будущем они могут быть заменены, а также появятся совершенно новые герои.",
+                info_text3: "🎨 <strong>Все изображения</strong> в игре созданы с помощью нейросетей, поскольку у меня пока нет художника. Я извиняюсь за возможные стилистические несоответствия и постораюсь со временем улучшить визуальную составляющую.",
+                info_text4: "💾 <strong>Сохранения</strong> хранятся локально в браузере. Вы можете экспортировать свой прогресс и импортировать на другом устройстве.",
+                info_text5: "✨ <strong>Автор проекта:</strong> AvoKadka",
+                info_controls: "<strong>Управление:</strong> Нажимайте на кнопки для перехода между разделами. В разделе ПРИЗЫВ – выбирайте баннер и совершайте молитвы. В разделе ПОЛУЧИТЬ ОСКОЛКИ – кликайте по кристаллу или используйте автокликер за рекламу. Сохранение автоматическое.",
+                info_thanks: "Спасибо, что играете!",
+                button_close: "ЗАКРЫТЬ",
+                confirm_title: "⚠️ ПОДТВЕРЖДЕНИЕ",
+                confirm_message: "Вы уверены, что хотите очистить весь прогресс?",
+                confirm_yes: "ДА, ОЧИСТИТЬ",
+                confirm_no: "ОТМЕНА"
+            },
+            en: {
+                button_banner_title: "SUMMON",
+                button_banner_desc: "Get new characters and weapons",
+                button_farm_title: "GET SHARDS",
+                button_farm_desc: "Earn shards",
+                button_char_title: "CHARACTER GALLERY",
+                button_char_desc: "View all characters",
+                button_weapon_title: "WEAPON GALLERY",
+                button_weapon_desc: "View all weapons",
+                button_info_title: "INFO",
+                button_info_desc: "About the project and saves",
+                button_export: "💾 EXPORT",
+                button_import: "📂 IMPORT",
+                button_auth: "🔑 Sign in",
+                button_reset: "🔄️ RESET",
+                info_title: "ℹ️ ABOUT THE PROJECT",
+                info_text1: "This is an <strong>early version of the game</strong> under development. Many changes, improvements and new content are ahead.",
+                info_text2: "🎭 <strong>Characters and weapons</strong> shown now are just the first step. They may be replaced in the future, and completely new heroes will appear.",
+                info_text3: "🎨 <strong>All images</strong> in the game were created using neural networks, as I don't have an artist yet. I apologize for any stylistic inconsistencies and will try to improve the visual component over time.",
+                info_text4: "💾 <strong>Saves</strong> are stored locally in your browser. You can export your progress and import it on another device.",
+                info_text5: "✨ <strong>Project author:</strong> AvoKadka",
+                info_controls: "<strong>Controls:</strong> Click buttons to navigate. In SUMMON section – choose a banner and make wishes. In GET SHARDS section – click the crystal or use auto-clicker via ad. Auto-save is enabled.",
+                info_thanks: "Thank you for playing!",
+                button_close: "CLOSE",
+                confirm_title: "⚠️ CONFIRMATION",
+                confirm_message: "Are you sure you want to clear all progress?",
+                confirm_yes: "YES, CLEAR",
+                confirm_no: "CANCEL"
+            }
+        };
+
+        // Глобальные переменные
+        let globalCurrency = 0;
         let globalHistory = [];
         let globalCounters = { SSR: 90, SR: 10 };
         let globalCollectedCharacters = [];
         let globalCollectedWeapons = [];
         let globalTotalPulls = 0;
         let globalCurrentGachaType = 'char';
-        const STORAGE_KEY = 'genshin_game_data';
-        
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toastMessage');
-            toast.textContent = message;
-            toast.style.background = isError ? 'rgba(100, 50, 50, 0.95)' : 'rgba(0, 0, 0, 0.85)';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-        
+        let ysdk = null;
+        let isLoggedIn = false;
+        let currentLocale = 'ru';
+        let currencyName = "Осколки";
+
+        // Защита от частого сохранения в облако (throttle)
+        let pendingCloudSave = false;
+        let cloudSaveTimeout = null;
+
+        // ========== РАБОТА С ДАННЫМИ (локальные) ==========
         function loadGameData() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -304,7 +387,7 @@
             }
             updateCurrencyDisplay();
         }
-        
+
         function saveGameData() {
             const gameData = {
                 currency: globalCurrency,
@@ -318,12 +401,201 @@
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
         }
-        
+
+        // Сохраняем всё (локально и, если авторизованы, в облако)
+        function saveGameDataAndCloud() {
+            saveGameData();
+            if (isLoggedIn && ysdk) {
+                scheduleCloudSave();
+            }
+        }
+
+        function scheduleCloudSave() {
+            if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
+            pendingCloudSave = true;
+            cloudSaveTimeout = setTimeout(() => {
+                if (pendingCloudSave && isLoggedIn && ysdk) {
+                    saveToCloud();
+                    pendingCloudSave = false;
+                }
+                cloudSaveTimeout = null;
+            }, 1000);
+        }
+
+        async function saveToCloud() {
+            if (!ysdk || !isLoggedIn) return;
+            try {
+                const player = await ysdk.player.getPlayer();
+                const dataToSave = {
+                    currency: globalCurrency,
+                    history: globalHistory,
+                    counters: globalCounters,
+                    collectedCharacters: globalCollectedCharacters,
+                    collectedWeapons: globalCollectedWeapons,
+                    totalPulls: globalTotalPulls,
+                    currentGachaType: globalCurrentGachaType,
+                    lastCloudSave: new Date().toISOString()
+                };
+                await player.setData({ game_data: JSON.stringify(dataToSave) });
+                showToast("☁️ Прогресс сохранён в облако", false);
+            } catch (err) {
+                console.error("Ошибка сохранения в облако:", err);
+                showToast("⚠️ Не удалось сохранить в облако", true);
+            }
+        }
+
+        async function loadCloudData() {
+            if (!ysdk || !isLoggedIn) return;
+            try {
+                const player = await ysdk.player.getPlayer();
+                const data = await player.getData(['game_data']);
+                if (data && data.game_data) {
+                    const cloudData = JSON.parse(data.game_data);
+                    globalCurrency = cloudData.currency ?? 0;
+                    globalHistory = cloudData.history ?? [];
+                    globalCounters = cloudData.counters ?? { SSR: 90, SR: 10 };
+                    globalCollectedCharacters = cloudData.collectedCharacters ?? [];
+                    globalCollectedWeapons = cloudData.collectedWeapons ?? [];
+                    globalTotalPulls = cloudData.totalPulls ?? 0;
+                    globalCurrentGachaType = cloudData.currentGachaType ?? 'char';
+                    saveGameData(); // обновляем локальное хранилище
+                    updateCurrencyDisplay();
+                    showToast("☁️ Прогресс загружен из облака", false);
+                } else {
+                    // В облаке данных нет, сохраняем текущие локальные
+                    await saveToCloud();
+                }
+            } catch (err) {
+                console.error("Ошибка загрузки из облака:", err);
+                showToast("⚠️ Не удалось загрузить облачные данные", true);
+            }
+        }
+
         function updateCurrencyDisplay() {
             const el = document.getElementById('hubCurrencyAmount');
             if (el) el.innerText = globalCurrency;
         }
-        
+
+        function updateCurrencyNameDisplay() {
+            document.querySelectorAll('.currency-label').forEach(el => {
+                el.textContent = currencyName;
+            });
+        }
+
+        // ========== АВТОРИЗАЦИЯ ==========
+        async function updateAuthUI() {
+            const authBtn = document.getElementById('yandexAuthBtn');
+            const userNameSpan = document.getElementById('userName');
+            if (!authBtn) return;
+            try {
+                if (isLoggedIn) {
+                    const player = await ysdk.player.getPlayer();
+                    const playerName = player.getName() || "Игрок";
+                    userNameSpan.textContent = playerName;
+                    userNameSpan.style.display = 'inline';
+                    authBtn.textContent = LOCALE_STRINGS[currentLocale]?.button_auth || "🔑 Войти";
+                } else {
+                    userNameSpan.textContent = "";
+                    userNameSpan.style.display = 'none';
+                    authBtn.textContent = LOCALE_STRINGS[currentLocale]?.button_auth || "🔑 Войти";
+                }
+            } catch (e) {
+                isLoggedIn = false;
+                userNameSpan.textContent = "";
+                userNameSpan.style.display = 'none';
+                authBtn.textContent = LOCALE_STRINGS[currentLocale]?.button_auth || "🔑 Войти";
+            }
+        }
+
+        async function handleAuth() {
+            if (!ysdk) {
+                showToast("SDK не загружен, попробуйте позже", true);
+                return;
+            }
+            try {
+                if (isLoggedIn) {
+                    // Выход: отключаем облако, данные остаются локальными
+                    await ysdk.auth.logout();
+                    isLoggedIn = false;
+                    await updateAuthUI();
+                    showToast("Вы вышли из аккаунта");
+                } else {
+                    // Вход: пытаемся войти
+                    const result = await ysdk.auth.login();
+                    if (result) {
+                        isLoggedIn = true;
+                        await updateAuthUI();
+                        // Загружаем облачные данные после входа
+                        await loadCloudData();
+                        showToast("✅ Вход выполнен, данные загружены");
+                    } else {
+                        showToast("Вход не выполнен", true);
+                    }
+                }
+            } catch (err) {
+                console.error("Ошибка авторизации:", err);
+                showToast("Ошибка при входе/выходе", true);
+            }
+        }
+
+        // ========== ИНИЦИАЛИЗАЦИЯ SDK ==========
+        async function initSDK() {
+            try {
+                ysdk = await YaGames.init();
+                // Определяем язык
+                const lang = ysdk.environment.i18n.lang;
+                if (lang && LOCALE_STRINGS[lang]) {
+                    currentLocale = lang;
+                } else {
+                    currentLocale = 'ru';
+                }
+                applyLocale(currentLocale);
+
+                // Получаем название валюты через SDK
+                try {
+                    const currencyInfo = ysdk.getCurrency();
+                    if (currencyInfo && currencyInfo.name) {
+                        currencyName = currencyInfo.name;
+                    }
+                } catch(e) {}
+                updateCurrencyNameDisplay();
+
+                // Проверяем авторизацию
+                try {
+                    const player = await ysdk.player.getPlayer();
+                    isLoggedIn = !!player;
+                } catch (e) {
+                    isLoggedIn = false;
+                }
+                await updateAuthUI();
+
+                // Если пользователь уже авторизован, загружаем облачные данные
+                if (isLoggedIn) {
+                    await loadCloudData();
+                } else {
+                    // Иначе просто загружаем локальные
+                    loadGameData();
+                }
+
+                ysdk.features.LoadingAPI?.ready();
+            } catch(e) {
+                console.warn('SDK init failed:', e);
+                // Загружаем локальные данные в любом случае
+                loadGameData();
+            }
+        }
+
+        function applyLocale(locale) {
+            const strings = LOCALE_STRINGS[locale] || LOCALE_STRINGS.ru;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (strings[key] !== undefined) {
+                    el.innerHTML = strings[key];
+                }
+            });
+        }
+
+        // ========== ЭКСПОРТ / ИМПОРТ ==========
         function exportSave() {
             const saveData = {
                 version: "1.0",
@@ -341,12 +613,12 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `genshin_save_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            a.download = `save_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
             a.click();
             URL.revokeObjectURL(url);
             showToast("✅ Сохранение экспортировано!");
         }
-        
+
         function importSave(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -360,7 +632,7 @@
                     globalCollectedWeapons = saveData.collectedWeapons ?? [];
                     globalTotalPulls = saveData.totalPulls ?? 0;
                     globalCurrentGachaType = saveData.currentGachaType ?? 'char';
-                    saveGameData();
+                    saveGameDataAndCloud(); // сохраняем локально и в облако
                     updateCurrencyDisplay();
                     showToast("✅ Прогресс восстановлен!");
                 } catch (error) {
@@ -369,9 +641,14 @@
             };
             reader.readAsText(file);
         }
-        
+
         function resetAllGameData() {
-            if (confirm("⚠️ ВНИМАНИЕ! Это действие НЕОБРАТИМО!\n\nБудут удалены:\n• Все примогемы\n• Вся история круток\n• Все полученные персонажи и оружие\n• Счётчики гарантов\n\nВы уверены, что хотите очистить весь прогресс?")) {
+            const modal = document.getElementById('confirmModal');
+            if (!modal) return;
+            modal.classList.add('active');
+            const yesBtn = document.getElementById('confirmYesBtn');
+            const noBtn = document.getElementById('confirmNoBtn');
+            const handleYes = () => {
                 localStorage.removeItem(STORAGE_KEY);
                 globalCurrency = 0;
                 globalHistory = [];
@@ -380,52 +657,85 @@
                 globalCollectedWeapons = [];
                 globalTotalPulls = 0;
                 globalCurrentGachaType = 'char';
-                saveGameData();
+                saveGameDataAndCloud(); // очищаем и в облаке
                 updateCurrencyDisplay();
                 showToast("✅ Все данные очищены! Прогресс сброшен.");
+                modal.classList.remove('active');
+                cleanup();
+            };
+            const handleNo = () => {
+                modal.classList.remove('active');
+                cleanup();
+            };
+            const cleanup = () => {
+                yesBtn.removeEventListener('click', handleYes);
+                noBtn.removeEventListener('click', handleNo);
+            };
+            yesBtn.addEventListener('click', handleYes);
+            noBtn.addEventListener('click', handleNo);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastMessage');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.style.background = isError ? 'rgba(100, 50, 50, 0.95)' : 'rgba(0, 0, 0, 0.85)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ========== ОБРАБОТЧИКИ КНОПОК ==========
+        function bindEventHandlers() {
+            document.getElementById('gotoBannerBtn').addEventListener('click', () => {
+                saveGameDataAndCloud();
+                window.location.href = "banner.html";
+            });
+            document.getElementById('farmBtn').addEventListener('click', () => {
+                saveGameDataAndCloud();
+                window.location.href = "farm.html";
+            });
+            document.getElementById('galleryCharBtn').addEventListener('click', () => {
+                saveGameDataAndCloud();
+                window.location.href = "gallery_char.html";
+            });
+            document.getElementById('galleryWeaponBtn').addEventListener('click', () => {
+                saveGameDataAndCloud();
+                window.location.href = "gallery_weapon.html";
+            });
+            document.getElementById('infoBtn').addEventListener('click', () => {
+                document.getElementById('infoModal').classList.add('active');
+            });
+            document.getElementById('closeInfoBtn').addEventListener('click', () => {
+                document.getElementById('infoModal').classList.remove('active');
+            });
+            document.getElementById('exportSaveBtn').addEventListener('click', exportSave);
+            document.getElementById('importSaveBtn').addEventListener('click', () => {
+                document.getElementById('importFileInput').click();
+            });
+            document.getElementById('importFileInput').addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    importSave(e.target.files[0]);
+                    e.target.value = '';
+                }
+            });
+            document.getElementById('clearAllDataBtn').addEventListener('click', resetAllGameData);
+            if (document.getElementById('yandexAuthBtn')) {
+                document.getElementById('yandexAuthBtn').addEventListener('click', handleAuth);
             }
         }
-        
-        document.getElementById('gotoBannerBtn').addEventListener('click', () => {
-            saveGameData();
-            window.location.href = "banner.html";
-        });
-        document.getElementById('farmBtn').addEventListener('click', () => {
-            saveGameData();
-            window.location.href = "farm.html";
-        });
-        document.getElementById('galleryCharBtn').addEventListener('click', () => {
-            saveGameData();
-            window.location.href = "gallery_char.html";
-        });
-        document.getElementById('galleryWeaponBtn').addEventListener('click', () => {
-            saveGameData();
-            window.location.href = "gallery_weapon.html";
-        });
-        document.getElementById('raidsBtn').addEventListener('click', () => {
-            showToast("🏆 РЕЙДЫ\nСкоро здесь появятся сложные испытания!");
-        });
-        document.getElementById('infoBtn').addEventListener('click', () => {
-            document.getElementById('infoModal').classList.add('active');
-        });
-        document.getElementById('closeInfoBtn').addEventListener('click', () => {
-            document.getElementById('infoModal').classList.remove('active');
-        });
-        document.getElementById('exportSaveBtn').addEventListener('click', exportSave);
-        document.getElementById('importSaveBtn').addEventListener('click', () => {
-            document.getElementById('importFileInput').click();
-        });
-        document.getElementById('importFileInput').addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                importSave(e.target.files[0]);
-                e.target.value = '';
+
+        // Экспортируем глобальную функцию для сохранения в облако из других файлов
+        window.saveToCloud = function() {
+            if (isLoggedIn && ysdk) {
+                scheduleCloudSave();
             }
-        });
-        document.getElementById('clearAllDataBtn').addEventListener('click', resetAllGameData);
-        
+        };
+
+        // Запуск
+        bindEventHandlers();
         loadGameData();
-        window.addEventListener('beforeunload', () => saveGameData());
-        setInterval(() => saveGameData(), 30000);
+        window.addEventListener('beforeunload', () => saveGameDataAndCloud());
+        setInterval(() => saveGameDataAndCloud(), 30000);
     </script>
 </body>
 </html>

@@ -3,21 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Молитва | Genshin Impact</title>
+    <title>Призыв</title>
     <style>
-        /* ========== СТИЛИ (как в предыдущей версии, с добавлением анимаций) ========== */
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            color: #FFE2B5;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            border: 1px solid rgba(255, 215, 150, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+        .toast-message.show {
+            opacity: 1;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
         body {
             min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            background: #0a1a2a;
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
             position: relative;
         }
         body::before {
             content: '';
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.55);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1a2a3a, #0a121c);
             pointer-events: none;
             z-index: 0;
         }
@@ -44,18 +72,24 @@
         }
         .character-frame {
             width: 100%;
-            max-width: 1000px;
+            max-width: 800px;
             aspect-ratio: 16 / 9;
             border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.8), 0 0 0 4px rgba(255,215,150,0.6), 0 0 0 12px rgba(0,0,0,0.3);
-            background: rgba(0,0,0,0.3);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(255, 215, 150, 0.6), 0 0 0 12px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
         }
-        .character-frame img { width: 100%; height: 100%; display: block; object-fit: cover; }
+        .character-frame img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+        }
         .top-bar {
             position: fixed;
             top: 30px;
-            left: 0; right: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -70,9 +104,9 @@
             pointer-events: auto;
         }
         .back-btn {
-            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,200,100,0.6);
+            border: 1px solid rgba(255, 200, 100, 0.6);
             padding: 10px 22px;
             border-radius: 60px;
             color: #FFE2B5;
@@ -86,11 +120,15 @@
             gap: 8px;
             pointer-events: auto;
         }
-        .back-btn:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(66,93,108,0.95), rgba(28,45,58,0.95)); border-color: #ffcd7e; }
+        .back-btn:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(66, 93, 108, 0.95), rgba(28, 45, 58, 0.95));
+            border-color: #ffcd7e;
+        }
         .currency-display {
-            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,200,100,0.6);
+            border: 1px solid rgba(255, 200, 100, 0.6);
             padding: 10px 22px;
             border-radius: 60px;
             color: #FFE2B5;
@@ -101,8 +139,17 @@
             gap: 8px;
             pointer-events: auto;
         }
-        .currency-icon { font-size: 1.2rem; }
-        .currency-amount { font-size: 1.2rem; font-weight: 800; color: #FFDFA5; }
+        .currency-icon {
+            width: 1.4rem;
+            height: 1.4rem;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .currency-amount {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #FFDFA5;
+        }
         .gacha-selector {
             position: fixed;
             left: 30px;
@@ -114,16 +161,25 @@
             z-index: 25;
         }
         .gacha-option {
-            width: 80px; height: 80px;
+            width: 80px;
+            height: 80px;
             border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
             transition: all 0.2s ease;
             border: 2px solid transparent;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        .gacha-option img { width: 100%; height: 100%; object-fit: cover; }
-        .gacha-option.active { border: 2px solid #FFD966; box-shadow: 0 0 15px rgba(255,217,102,0.5); transform: scale(1.05); }
+        .gacha-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .gacha-option.active {
+            border: 2px solid #FFD966;
+            box-shadow: 0 0 15px rgba(255, 217, 102, 0.5);
+            transform: scale(1.05);
+        }
         .counters-panel {
             position: absolute;
             bottom: 20px;
@@ -131,25 +187,56 @@
             transform: translateX(-50%);
             display: flex;
             gap: 40px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(16px);
             padding: 12px 32px;
             border-radius: 80px;
-            border: 1px solid rgba(255,215,150,0.5);
+            border: 1px solid rgba(255, 215, 150, 0.5);
             z-index: 10;
             flex-wrap: wrap;
             justify-content: center;
         }
-        .counter-item { text-align: center; min-width: 100px; }
-        .counter-label { font-size: 0.7rem; color: #e2cf9e; letter-spacing: 1px; text-transform: uppercase; }
-        .counter-value { font-size: 1.8rem; font-weight: 800; color: #FFDFA5; line-height: 1; }
-        .counter-note { font-size: 0.6rem; color: #9aaec9; }
-        .bottom-right { position: fixed; bottom: 30px; right: 30px; display: flex; gap: 20px; z-index: 20; }
-        .bottom-left { position: fixed; bottom: 30px; left: 30px; display: flex; gap: 15px; z-index: 20; }
+        .counter-item {
+            text-align: center;
+            min-width: 100px;
+        }
+        .counter-label {
+            font-size: 0.7rem;
+            color: #e2cf9e;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .counter-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #FFDFA5;
+            line-height: 1;
+        }
+        .counter-note {
+            font-size: 0.6rem;
+            color: #9aaec9;
+        }
+        .bottom-left {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 20;
+        }
+        .bottom-right {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 20;
+        }
         .action-btn {
-            background: radial-gradient(ellipse at 30% 30%, rgba(46,63,78,0.95), rgba(18,31,43,0.95));
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,200,100,0.6);
+            border: 1px solid rgba(255, 200, 100, 0.6);
             padding: 10px 22px;
             border-radius: 60px;
             color: #FFE2B5;
@@ -162,7 +249,11 @@
             align-items: center;
             gap: 8px;
         }
-        .action-btn:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(66,93,108,0.95), rgba(28,45,58,0.95)); border-color: #ffcd7e; }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(66, 93, 108, 0.95), rgba(28, 45, 58, 0.95));
+            border-color: #ffcd7e;
+        }
         .pray-btn {
             background: radial-gradient(ellipse at 30% 20%, #d4a373, #b87c4f);
             border: none;
@@ -177,20 +268,25 @@
             align-items: center;
             gap: 10px;
             font-family: inherit;
-            border: 1px solid rgba(255,220,120,0.8);
+            border: 1px solid rgba(255, 220, 120, 0.8);
             min-width: 150px;
             justify-content: center;
         }
-        .pray-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #6b3e1a; }
-        .pray-btn.disabled { opacity: 0.6; pointer-events: none; }
-        .danger-btn { background: radial-gradient(ellipse at 30% 30%, rgba(100,50,50,0.95), rgba(60,25,25,0.95)); border-color: rgba(255,100,100,0.5); }
-        
-        /* АНИМАЦИОННЫЙ ОВЕРЛЕЙ */
+        .pray-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #6b3e1a;
+        }
+        .pray-btn.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
         .wish-animation-overlay {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
             backdrop-filter: blur(15px);
             z-index: 2000;
             display: flex;
@@ -202,7 +298,10 @@
             flex-direction: column;
             cursor: pointer;
         }
-        .wish-animation-overlay.active { visibility: visible; opacity: 1; }
+        .wish-animation-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
         .animation-container {
             text-align: center;
             width: 90%;
@@ -228,8 +327,14 @@
             animation: starBurst 0.7s ease-out forwards;
         }
         @keyframes starBurst {
-            0% { transform: scale(0) rotate(0deg); opacity: 1; }
-            100% { transform: scale(2.2) rotate(180deg); opacity: 0; }
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.2) rotate(180deg);
+                opacity: 0;
+            }
         }
         .result-card {
             background: linear-gradient(145deg, #1e2a32, #0f1a1f);
@@ -239,42 +344,94 @@
             animation: slideInResult 0.4s ease-out forwards;
         }
         @keyframes slideInResult {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         .result-image {
             width: 100%;
             aspect-ratio: 9 / 16;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: top center;
+            background: #0a1a2a;
             border-radius: 16px;
             margin-bottom: 10px;
             border: 2px solid;
             max-height: 55vh;
         }
-        .result-name { font-size: 1.2rem; font-weight: bold; margin: 6px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .result-rarity { font-size: 0.85rem; letter-spacing: 2px; font-weight: bold; }
-        .result-type { font-size: 0.7rem; opacity: 0.9; margin-top: 4px; color: #dddddd; }
-        .result-counter { margin-top: 10px; font-size: 0.8rem; color: #FFDEAD; }
-        .result-UR { border-color: #FF6B6B; background: linear-gradient(145deg, #2a1a1a, #1a0f0f); }
-        .result-UR .result-name { color: #FFB5B5; }
-        .result-UR .result-rarity { color: #FF6B6B; }
-        .result-SSR { border-color: #FFB347; background: linear-gradient(145deg, #2a241a, #1a1a1a); }
-        .result-SSR .result-name { color: #FFD966; }
-        .result-SSR .result-rarity { color: #FFB347; }
-        .result-SR { border-color: #c98eff; }
-        .result-SR .result-name { color: #E8D0FF; }
-        .result-SR .result-rarity { color: #c98eff; }
-        .result-R { border-color: #7f8c8d; }
-        .result-R .result-name { color: #FFFFFF; }
-        .result-R .result-rarity { color: #bdc3c7; }
-        
+        .result-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 6px 0;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .result-rarity {
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .result-type {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            margin-top: 4px;
+            color: #dddddd;
+        }
+        .result-counter {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #FFDEAD;
+        }
+        .result-UR {
+            border-color: #FF6B6B;
+            background: linear-gradient(145deg, #2a1a1a, #1a0f0f);
+        }
+        .result-UR .result-name {
+            color: #FFB5B5;
+        }
+        .result-UR .result-rarity {
+            color: #FF6B6B;
+        }
+        .result-SSR {
+            border-color: #FFB347;
+            background: linear-gradient(145deg, #2a241a, #1a1a1a);
+        }
+        .result-SSR .result-name {
+            color: #FFD966;
+        }
+        .result-SSR .result-rarity {
+            color: #FFB347;
+        }
+        .result-SR {
+            border-color: #c98eff;
+        }
+        .result-SR .result-name {
+            color: #E8D0FF;
+        }
+        .result-SR .result-rarity {
+            color: #c98eff;
+        }
+        .result-R {
+            border-color: #7f8c8d;
+        }
+        .result-R .result-name {
+            color: #FFFFFF;
+        }
+        .result-R .result-rarity {
+            color: #bdc3c7;
+        }
         .skip-btn-overlay {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: radial-gradient(ellipse at 30% 30%, rgba(100,70,50,0.95), rgba(60,40,30,0.95));
+            background: radial-gradient(ellipse at 30% 30%, rgba(100, 70, 50, 0.95), rgba(60, 40, 30, 0.95));
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,200,100,0.6);
+            border: 1px solid rgba(255, 200, 100, 0.6);
             padding: 10px 22px;
             border-radius: 60px;
             color: #FFE2B5;
@@ -288,13 +445,17 @@
             align-items: center;
             gap: 8px;
         }
-        .skip-btn-overlay:hover { transform: translateY(-2px); background: radial-gradient(ellipse at 30% 30%, rgba(130,90,70,0.95), rgba(80,55,45,0.95)); border-color: #ffcd7e; }
-        
-        /* Итоговая сетка 2×5 */
+        .skip-btn-overlay:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(130, 90, 70, 0.95), rgba(80, 55, 45, 0.95));
+            border-color: #ffcd7e;
+        }
         .final-results-wrapper {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -306,10 +467,10 @@
             margin: 0 auto;
             padding: 25px 20px;
             cursor: default;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 32px;
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,215,150,0.5);
+            border: 1px solid rgba(255, 215, 150, 0.5);
             pointer-events: auto;
         }
         .final-results-grid {
@@ -319,15 +480,18 @@
             row-gap: 20px;
         }
         .final-result-item {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 16px;
             padding: 10px 8px;
             text-align: center;
             transition: transform 0.2s;
             animation: fadeInScale 0.15s ease-out forwards;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .final-result-item:hover { transform: translateY(-5px); border-color: rgba(255,215,150,0.5); }
+        .final-result-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 215, 150, 0.5);
+        }
         .final-result-image {
             width: 100%;
             aspect-ratio: 9 / 16;
@@ -336,43 +500,72 @@
             margin-bottom: 8px;
             border: 2px solid;
         }
-        .final-result-name { font-weight: bold; font-size: 0.8rem; color: #ffffff; white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; }
-        .final-result-rarity { font-size: 0.65rem; margin-top: 4px; font-weight: bold; }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.92); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .final-ur { border-color: #FF6B6B; }
-        .final-ur .final-result-name { color: #FFB5B5; }
-        .final-ur .final-result-rarity { color: #FF6B6B; }
-        .final-ssr { border-color: #FFB347; }
-        .final-ssr .final-result-name { color: #FFD966; }
-        .final-ssr .final-result-rarity { color: #FFB347; }
-        .final-sr { border-color: #c98eff; }
-        .final-sr .final-result-name { color: #E8D0FF; }
-        .final-sr .final-result-rarity { color: #c98eff; }
-        .final-r { border-color: #7f8c8d; }
-        .final-r .final-result-name { color: #FFFFFF; }
-        .final-r .final-result-rarity { color: #bdc3c7; }
-        
-        .continue-btn {
-            background: radial-gradient(ellipse at 30% 20%, #d4a373, #b87c4f);
-            border: none;
-            padding: 10px 28px;
-            font-size: 1rem;
+        .final-result-name {
             font-weight: bold;
-            border-radius: 60px;
-            color: white;
-            cursor: pointer;
-            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
         }
-        
-        /* модальные окна */
+        .final-result-rarity {
+            font-size: 0.65rem;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .final-ur {
+            border-color: #FF6B6B;
+        }
+        .final-ur .final-result-name {
+            color: #FFB5B5;
+        }
+        .final-ur .final-result-rarity {
+            color: #FF6B6B;
+        }
+        .final-ssr {
+            border-color: #FFB347;
+        }
+        .final-ssr .final-result-name {
+            color: #FFD966;
+        }
+        .final-ssr .final-result-rarity {
+            color: #FFB347;
+        }
+        .final-sr {
+            border-color: #c98eff;
+        }
+        .final-sr .final-result-name {
+            color: #E8D0FF;
+        }
+        .final-sr .final-result-rarity {
+            color: #c98eff;
+        }
+        .final-r {
+            border-color: #7f8c8d;
+        }
+        .final-r .final-result-name {
+            color: #FFFFFF;
+        }
+        .final-r .final-result-rarity {
+            color: #bdc3c7;
+        }
         .modal {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
             backdrop-filter: blur(12px);
             display: flex;
             justify-content: center;
@@ -382,7 +575,10 @@
             opacity: 0;
             transition: 0.2s;
         }
-        .modal.active { visibility: visible; opacity: 1; }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
         .modal-content {
             background: #131f2ce6;
             width: 90%;
@@ -407,7 +603,10 @@
             margin: 10px 0;
             color: #e7cf9e;
         }
-        .history-list { max-height: 280px; overflow-y: auto; }
+        .history-list {
+            max-height: 280px;
+            overflow-y: auto;
+        }
         .history-item {
             display: flex;
             justify-content: space-between;
@@ -442,9 +641,17 @@
             border-bottom: 1px solid #4a3e2e;
             color: #e0d4bc;
         }
-        .rarity-5-star { color: #FFB347; font-weight: bold; }
-        .rarity-4-star { color: #c98eff; font-weight: bold; }
-        .rarity-3-star { color: #7f8c8d; }
+        .rarity-5-star {
+            color: #FFB347;
+            font-weight: bold;
+        }
+        .rarity-4-star {
+            color: #c98eff;
+            font-weight: bold;
+        }
+        .rarity-3-star {
+            color: #7f8c8d;
+        }
         .section-title {
             color: #FFDEAD;
             margin: 20px 0 10px;
@@ -460,16 +667,143 @@
             font-size: 0.8rem;
             color: #b9cfec;
         }
+
+        /* ========== МОБИЛЬНАЯ АДАПТАЦИЯ ========== */
         @media (max-width: 768px) {
-            .counters-panel { gap: 15px; padding: 8px 20px; }
-            .counter-item { min-width: 70px; }
-            .counter-value { font-size: 1.3rem; }
-            .pray-btn { padding: 8px 20px; font-size: 0.9rem; min-width: 120px; }
-            .gacha-option { width: 60px; height: 60px; }
+            .game-container {
+                padding: 20px;
+            }
+            .top-bar {
+                padding: 0 15px;
+                top: 10px;
+            }
+            .back-btn,
+            .currency-display {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+            }
+            .currency-amount {
+                font-size: 0.9rem;
+            }
+            .gacha-selector {
+                position: fixed;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                flex-direction: row;
+                gap: 12px;
+                background: rgba(0, 0, 0, 0.6);
+                backdrop-filter: blur(8px);
+                padding: 5px 12px;
+                border-radius: 60px;
+                border: 1px solid rgba(255, 215, 150, 0.5);
+                width: auto;
+            }
+            .gacha-option {
+                width: 50px;
+                height: 50px;
+            }
+            .counters-panel {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin: 20px auto 0;
+                width: fit-content;
+                gap: 20px;
+                padding: 8px 15px;
+                background: rgba(0, 0, 0, 0.7);
+            }
+            .counter-item {
+                min-width: 70px;
+            }
+            .counter-value {
+                font-size: 1.2rem;
+            }
+            .counter-label {
+                font-size: 0.6rem;
+            }
+            .character-frame {
+                margin-top: 100px;
+            }
+            .bottom-left {
+                bottom: 20px;
+                left: 20px;
+                gap: 12px;
+            }
+            .bottom-right {
+                bottom: 20px;
+                right: 20px;
+                gap: 12px;
+            }
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+            .pray-btn {
+                padding: 6px 16px;
+                font-size: 0.85rem;
+                min-width: 120px;
+            }
+            .final-results-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .final-result-item {
+                padding: 5px;
+            }
+            .final-result-name {
+                font-size: 0.7rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .gacha-selector {
+                top: 60px;
+                gap: 8px;
+                padding: 4px 10px;
+            }
+            .gacha-option {
+                width: 40px;
+                height: 40px;
+            }
+            .counters-panel {
+                gap: 12px;
+                padding: 4px 10px;
+            }
+            .counter-item {
+                min-width: 55px;
+            }
+            .counter-value {
+                font-size: 1rem;
+            }
+            .character-frame {
+                margin-top: 90px;
+            }
+            .bottom-left {
+                bottom: 15px;
+                left: 15px;
+            }
+            .bottom-right {
+                bottom: 15px;
+                right: 15px;
+            }
+            .action-btn {
+                padding: 5px 10px;
+                font-size: 0.7rem;
+            }
+            .pray-btn {
+                padding: 5px 12px;
+                font-size: 0.75rem;
+                min-width: 100px;
+            }
+            .final-results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
+<div id="toastMessage" class="toast-message"></div>
 <div class="game-container">
     <div class="banner-card">
         <div class="character-center">
@@ -483,12 +817,12 @@
 
 <div class="top-bar">
     <div class="top-left-group">
-        <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+        <button class="back-btn" id="backToHubBtn" data-i18n="back_btn">← НАЗАД</button>
     </div>
     <div class="currency-display">
-        <span class="currency-icon">⭐</span>
-        <span class="currency-amount" id="currencyAmount">10000</span>
-        <span>Примогемы</span>
+        <img src="./images/ui/crystal_icon.png" class="currency-icon" alt="Эссенция">
+        <span class="currency-amount" id="currencyAmount">0</span>
+        <span class="currency-label">Осколки</span>
     </div>
 </div>
 
@@ -502,395 +836,482 @@
 </div>
 
 <div class="bottom-left">
-    <button class="action-btn" id="openHistoryBtn">📜 ИСТОРИЯ</button>
-    <button class="action-btn" id="openDetailsBtn">ℹ️ ДЕТАЛИ</button>
+    <button class="action-btn" id="openHistoryBtn" data-i18n="history_btn">📜 ИСТОРИЯ</button>
+    <button class="action-btn" id="openDetailsBtn" data-i18n="details_btn">ℹ️ ДЕТАЛИ</button>
 </div>
 <div class="bottom-right">
-    <button class="pray-btn" id="pray1Btn">⭐ 1 РАЗ (300)</button>
-    <button class="pray-btn" id="pay10Btn">✨ 10 РАЗ (3000)</button>
+    <button class="pray-btn" id="pray1Btn" data-i18n="pray1_btn">⭐ 1 РАЗ (300)</button>
+    <button class="pray-btn" id="pay10Btn" data-i18n="pray10_btn">✨ 10 РАЗ (3000)</button>
 </div>
 
-<!-- Анимационный оверлей -->
 <div id="wishAnimation" class="wish-animation-overlay">
     <div class="animation-container">
         <div class="stars-container" id="starsContainer"></div>
         <div id="resultContainer"></div>
     </div>
-    <div id="skipButtonOverlay" class="skip-btn-overlay" style="display: none;">⏩ ПРОПУСТИТЬ</div>
+    <div id="skipButtonOverlay" class="skip-btn-overlay" style="display: none;" data-i18n="skip_btn">⏩ ПРОПУСТИТЬ</div>
 </div>
 
-<!-- Модальные окна -->
-<div id="historyModal" class="modal"><div class="modal-content"><h3>📖 ИСТОРИЯ МОЛИТВ</h3><div class="history-stats" id="modalStats"></div><div id="fullHistoryList" class="history-list"></div><button class="close-modal" id="closeHistoryBtn">ЗАКРЫТЬ</button></div></div>
-<div id="detailsModal" class="modal"><div class="modal-content"><h3>📊 ШАНСЫ ВЫПАДЕНИЯ</h3><div id="detailsTable"></div><button class="close-modal" id="closeDetailsBtn">ЗАКРЫТЬ</button></div></div>
+<div id="historyModal" class="modal"><div class="modal-content"><h3 data-i18n="history_title">📖 ИСТОРИЯ ПРИЗЫВОВ</h3><div class="history-stats" id="modalStats"></div><div id="fullHistoryList" class="history-list"></div><button class="close-modal" id="closeHistoryBtn" data-i18n="close_btn">ЗАКРЫТЬ</button></div></div>
+<div id="detailsModal" class="modal"><div class="modal-content"><h3 data-i18n="details_title">📊 ШАНСЫ ВЫПАДЕНИЯ</h3><div id="detailsTable"></div><button class="close-modal" id="closeDetailsBtn" data-i18n="close_btn">ЗАКРЫТЬ</button></div></div>
 
+<script async src="/sdk.js" onload="initSDK()"></script>
 <script>
-// ==================== КОНФИГУРАТОР ====================
-const GACHA_CONFIG = {
-    bannerImageChar: "https://avatars.mds.yandex.net/i?id=502afb34af82568191379ed1b393b4cf_l-9112075-images-thumbs&n=13",
-    bannerImageWeapon: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=1200&h=675&fit=crop",
-    gachaCharImage: "https://avatars.mds.yandex.net/i?id=502afb34af82568191379ed1b393b4cf_l-9112075-images-thumbs&n=13",
-    gachaWeaponImage: "https://images.unsplash.com/photo-1542751110-97427bbecf20?w=200&h=200&fit=crop",
-    startCurrency: 10000,
-    costPerPull: 300,
-    rarities: {
-        UR: { name: "UR", label: "UR", color: "#FF6B6B", chance: 0.1, guarantee: null },
-        SSR: { name: "SSR", label: "SSR", color: "#FFB347", chance: 0.8, guarantee: 90 },
-        SR: { name: "SR", label: "SR", color: "#c98eff", chance: 5.0, guarantee: 10 },
-        R: { name: "R", label: "R", color: "#7f8c8d", chance: 94.1, guarantee: null }
-    },
-    charItems: {
-        UR: [ { id: "paimon", name: "Чжун Ли", title: "Контракт Архонта", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/82/Персонаж_Чжун_Ли_Карточка.jpg/revision/latest?cb=20230407150112&path-prefix=ru" }, { id: "venti", name: "Венти", title: "Бард Анемо", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/3/32/Персонаж_Венти_Карточка.jpg/revision/latest?cb=20210302090739&path-prefix=ru" }, { id: "raiden", name: "Райдэн Эи", title: "Воплощение грома", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/d/d8/Персонаж_Райдэн_Карточка.jpg/revision/latest?cb=20210722144522&path-prefix=ru" } ],
-        SSR: [ { id: "mona", name: "Мона", title: "Звёздное отражение", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/7/70/Персонаж_Мона_Карточка.jpg/revision/latest?cb=20210330130549&path-prefix=ru" }, { id: "keqing", name: "Кэ Цин", title: "Раккаты грома", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/8/8d/Персонаж_Кэ_Цин_Карточка.jpg/revision/latest?cb=20230407200423&path-prefix=ru" }, { id: "diluc", name: "Дилюк", title: "Пылающий рыцарь", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/f/f7/Персонаж_Дилюк_Карточка.jpg/revision/latest?cb=20201020013558&path-prefix=ru" }, { id: "qiqi", name: "Ци Ци", title: "Ледяное возрождение", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/49/Персонаж_Ци_Ци_Карточка.jpg/revision/latest?cb=20201021085924&path-prefix=ru" } ],
-        SR: [ { id: "xiangling", name: "Сян Лин", title: "Повар-искатель", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/2/25/Персонаж_Сян_Лин_Карточка.jpg/revision/latest?cb=20201023204757&path-prefix=ru" }, { id: "ningguang", name: "Нин Гуан", title: "Жемчужница", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/a/a6/Персонаж_Нин_Гуан_Карточка.jpg/revision/latest?cb=20240329163428&path-prefix=ru" }, { id: "bennett", name: "Беннет", title: "Искатель приключений", type: "Персонаж", image: "https://static.wikia.nocookie.net/genshin-impact/images/4/4e/Персонаж_Беннет_Карточка.jpg/revision/latest?cb=20201021042837&path-prefix=ru" } ],
-        R: [ { id: "traveler_sword", name: "Меч путешественника", type: "Оружие", image: "https://picsum.photos/id/140/400/711" }, { id: "hunter_bow", name: "Лук охотника", type: "Оружие", image: "https://picsum.photos/id/142/400/711" }, { id: "magic_guide", name: "Книга магии", type: "Оружие", image: "https://picsum.photos/id/144/400/711" } ]
-    },
-    weaponItems: {
-        UR: [ { id: "divine_sword", name: "Божественный меч", title: "Клинок бесконечности", type: "Оружие", image: "https://picsum.photos/id/105/400/711" }, { id: "eternal_bow", name: "Вечный лук", title: "Стрела судьбы", type: "Оружие", image: "https://picsum.photos/id/107/400/711" }, { id: "primordial_spear", name: "Изначальное копьё", title: "Копьё первородного", type: "Оружие", image: "https://picsum.photos/id/109/400/711" } ],
-        SSR: [ { id: "skyward_spine", name: "Небесная ось", title: "Копьё возмездия", type: "Оружие", image: "https://picsum.photos/id/114/400/711" }, { id: "aquila_favonia", name: "Аквила Фавония", title: "Меч", type: "Оружие", image: "https://picsum.photos/id/115/400/711" }, { id: "wolfs_gravestone", name: "Волчья погибель", title: "Двуручный меч", type: "Оружие", image: "https://picsum.photos/id/118/400/711" }, { id: "lost_prayer", name: "Утерянная молитва", title: "Катализатор", type: "Оружие", image: "https://picsum.photos/id/119/400/711" } ],
-        SR: [ { id: "sacrificial_sword", name: "Меч Сакрального льда", type: "Оружие", image: "https://picsum.photos/id/132/400/711" }, { id: "favonius_bow", name: "Лук-ловец ветра", type: "Оружие", image: "https://picsum.photos/id/134/400/711" }, { id: "dragons_tale", name: "Гримуар драконьих сказаний", type: "Оружие", image: "https://picsum.photos/id/136/400/711" }, { id: "ritual_sword", name: "Ритуальный меч", type: "Оружие", image: "https://picsum.photos/id/138/400/711" } ],
-        R: [ { id: "traveler_sword", name: "Меч путешественника", type: "Оружие", image: "https://picsum.photos/id/140/400/711" }, { id: "hunter_bow", name: "Лук охотника", type: "Оружие", image: "https://picsum.photos/id/142/400/711" }, { id: "magic_guide", name: "Книга магии", type: "Оружие", image: "https://picsum.photos/id/144/400/711" } ]
-    }
-};
+    // ========== КОНФИГУРАЦИЯ ==========
+    const STORAGE_KEY = 'avokadka_game_data';
 
-// ==================== КЛЮЧ ДЛЯ ХРАНЕНИЯ ====================
-const STORAGE_KEY = 'genshin_game_data';
-
-// ==================== ОСНОВНАЯ ЛОГИКА ====================
-let currentGachaType = 'char';
-let counters = { SSR: 90, SR: 10 };
-let history = [];
-let currency = GACHA_CONFIG.startCurrency;
-let collectedCharacters = [];
-let collectedWeapons = [];
-let totalPulls = 0;
-
-// Состояние анимации
-let isAnimating = false;
-let currentMultiItems = [];
-let currentMultiIndex = 0;
-let skipRequested = false;
-let isMultiMode = false;
-let showingFinalResults = false;
-
-// Загрузка данных из localStorage
-function loadGameData() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            currency = data.currency ?? GACHA_CONFIG.startCurrency;
-            history = data.history ?? [];
-            counters = data.counters ?? { SSR: 90, SR: 10 };
-            collectedCharacters = data.collectedCharacters ?? [];
-            collectedWeapons = data.collectedWeapons ?? [];
-            totalPulls = data.totalPulls ?? 0;
-            currentGachaType = data.currentGachaType ?? 'char';
-        } catch(e) { console.warn(e); }
-    }
-    if (history.length > 90) history = history.slice(0, 90);
-    updateUI();
-}
-
-// Сохранение данных
-function saveGameData() {
-    const gameData = {
-        currency, history, counters, collectedCharacters, collectedWeapons, totalPulls, currentGachaType,
-        lastSave: new Date().toISOString()
+    const LOCALE_STRINGS = {
+        ru: {
+            back_btn: "← НАЗАД",
+            history_btn: "📜 ИСТОРИЯ",
+            details_btn: "ℹ️ ДЕТАЛИ",
+            pray1_btn: "⭐ 1 РАЗ (300)",
+            pray10_btn: "✨ 10 РАЗ (3000)",
+            skip_btn: "⏩ ПРОПУСТИТЬ",
+            history_title: "📖 ИСТОРИЯ ПРИЗЫВОВ",
+            details_title: "📊 ШАНСЫ ВЫПАДЕНИЯ",
+            close_btn: "ЗАКРЫТЬ"
+        },
+        en: {
+            back_btn: "← BACK",
+            history_btn: "📜 HISTORY",
+            details_btn: "ℹ️ DETAILS",
+            pray1_btn: "⭐ 1 WISH (300)",
+            pray10_btn: "✨ 10 WISHES (3000)",
+            skip_btn: "⏩ SKIP",
+            history_title: "📖 WISH HISTORY",
+            details_title: "📊 DROP RATES",
+            close_btn: "CLOSE"
+        }
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
-}
 
-// Обновление UI
-function updateUI() {
-    document.getElementById('currencyAmount').innerText = currency;
-    updateCountersUI();
-    updateHistoryUI();
-    if (currentGachaType === 'char') {
-        document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageChar;
-        document.getElementById('gachaCharBtn').classList.add('active');
-        document.getElementById('gachaWeaponBtn').classList.remove('active');
-    } else {
-        document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageWeapon;
-        document.getElementById('gachaWeaponBtn').classList.add('active');
-        document.getElementById('gachaCharBtn').classList.remove('active');
+    const GACHA_CONFIG = {
+        bannerImageChar: "./images/banners/char_banner.png",
+        bannerImageWeapon: "./images/banners/weapon_banner.png",
+        gachaCharImage: "./images/banners/char_banner.png",
+        gachaWeaponImage: "./images/banners/weapon_banner.png",
+        startCurrency: 0,
+        costPerPull: 300,
+        rarities: {
+            UR: { name: "UR", label: "UR", color: "#FF6B6B", chance: 0.1, guarantee: null },
+            SSR: { name: "SSR", label: "SSR", color: "#FFB347", chance: 0.8, guarantee: 90 },
+            SR: { name: "SR", label: "SR", color: "#c98eff", chance: 5.0, guarantee: 10 },
+            R: { name: "R", label: "R", color: "#7f8c8d", chance: 94.1, guarantee: null }
+        },
+        charItems: {
+            UR: [{ id: "victor", name: "Виктóр", title: "Бессмертный", type: "Персонаж", image: "./images/characters/victor.png" }],
+            SSR: [
+                { id: "elian", name: "Элиан", title: "Хранительница штормов", type: "Персонаж", image: "./images/characters/elian.png" },
+                { id: "valor", name: "Валтор", title: "Рыцарь рассвета", type: "Персонаж", image: "./images/characters/valor.png" }
+            ],
+            SR: [
+                { id: "silva", name: "Сильва", title: "Лесная лучница", type: "Персонаж", image: "./images/characters/silva.png" },
+                { id: "brun", name: "Брун", title: "Кузнец-воин", type: "Персонаж", image: "./images/characters/brun.png" }
+            ],
+            R: [{ id: "guard_low", name: "Лоу", title: "Охранник городских ворот", type: "Персонаж", image: "./images/characters/guard_low.png" }]
+        },
+        weaponItems: {
+            UR: [{ id: "infinitystaff", name: "Бесконечность", title: "Посох вселенной", type: "Оружие", image: "./images/weapon/infinitystaff.png" }],
+            SSR: [{ id: "silverrain", name: "Серебряный дождь", title: "Лук дождя", type: "Оружие", image: "./images/weapon/silverrain.png" }],
+            SR: [{ id: "windcleaver", name: "Ветролом", title: "Меч ветров", type: "Оружие", image: "./images/weapon/windcleaver.png" }],
+            R: [{ id: "traveler_sword", name: "Меч путешественника", type: "Оружие", image: "./images/weapon/traveler_sword.png" }]
+        }
+    };
+
+    let currentGachaType = 'char';
+    let counters = { SSR: 90, SR: 10 };
+    let history = [];
+    let currency = 0;
+    let collectedCharacters = [];
+    let collectedWeapons = [];
+    let totalPulls = 0;
+    let isAnimating = false;
+    let currentMultiItems = [];
+    let currentMultiIndex = 0;
+    let skipRequested = false;
+    let isMultiMode = false;
+    let showingFinalResults = false;
+    let ysdk = null;
+    let currentLocale = 'ru';
+    let currencyName = "Осколки";
+
+    // ========== СИНХРОННАЯ ЗАГРУЗКА ДАННЫХ ==========
+    function loadGameDataSync() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                currency = data.currency ?? 0;
+                history = data.history ?? [];
+                counters = data.counters ?? { SSR: 90, SR: 10 };
+                collectedCharacters = data.collectedCharacters ?? [];
+                collectedWeapons = data.collectedWeapons ?? [];
+                totalPulls = data.totalPulls ?? 0;
+                currentGachaType = data.currentGachaType ?? 'char';
+                console.log('Sync load: currency =', currency);
+            } catch(e) { console.warn(e); }
+        }
+        updateUI();
     }
-}
 
-function updateCountersUI() {
-    const panel = document.getElementById('countersPanel');
-    panel.innerHTML = '';
-    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
-        if (data.guarantee && counters[rarity] !== undefined) {
-            panel.innerHTML += `<div class="counter-item"><div class="counter-label">ДО ГАРАНТА ${rarity}</div><div class="counter-value">${counters[rarity]}</div><div class="counter-note">макс. ${data.guarantee}</div></div>`;
+    function saveGameData() {
+        const gameData = {
+            currency, history, counters, collectedCharacters, collectedWeapons, totalPulls, currentGachaType,
+            lastSave: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData));
+        console.log('Saved currency:', currency);
+    }
+
+    function saveGameDataAndCloud() {
+        saveGameData();
+        if (typeof window.saveToCloud === 'function') window.saveToCloud();
+    }
+
+    // ========== ИНИЦИАЛИЗАЦИЯ SDK ==========
+    async function initSDK() {
+        try {
+            ysdk = await YaGames.init();
+            const lang = ysdk.environment.i18n.lang;
+            if (lang && LOCALE_STRINGS[lang]) currentLocale = lang;
+            else currentLocale = 'ru';
+            applyLocale(currentLocale);
+
+            try {
+                const currencyInfo = ysdk.getCurrency();
+                if (currencyInfo && currencyInfo.name) currencyName = currencyInfo.name;
+            } catch(e) {}
+            updateCurrencyNameDisplay();
+
+            ysdk.features.LoadingAPI?.ready();
+        } catch(e) { console.warn('SDK init failed:', e); }
+        // После инициализации SDK ещё раз загружаем данные
+        loadGameDataSync();
+    }
+
+    function applyLocale(locale) {
+        const strings = LOCALE_STRINGS[locale] || LOCALE_STRINGS.ru;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (strings[key] !== undefined) el.innerHTML = strings[key];
+        });
+    }
+
+    function updateCurrencyNameDisplay() {
+        document.querySelectorAll('.currency-label').forEach(el => el.textContent = currencyName);
+    }
+
+    // ========== ОСТАЛЬНЫЕ ФУНКЦИИ ==========
+    function updateUI() {
+        document.getElementById('currencyAmount').innerText = currency;
+        updateCountersUI();
+        updateHistoryUI();
+        if (currentGachaType === 'char') {
+            document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageChar;
+            document.getElementById('gachaCharImg').src = GACHA_CONFIG.bannerImageChar;
+            document.getElementById('gachaWeaponImg').src = GACHA_CONFIG.gachaWeaponImage;
+            document.getElementById('gachaCharBtn').classList.add('active');
+            document.getElementById('gachaWeaponBtn').classList.remove('active');
+        } else {
+            document.getElementById('bannerImage').src = GACHA_CONFIG.bannerImageWeapon;
+            document.getElementById('gachaWeaponImg').src = GACHA_CONFIG.bannerImageWeapon;
+            document.getElementById('gachaCharImg').src = GACHA_CONFIG.gachaCharImage;
+            document.getElementById('gachaWeaponBtn').classList.add('active');
+            document.getElementById('gachaCharBtn').classList.remove('active');
         }
     }
-}
 
-function updateHistoryUI() {
-    const stats = {};
-    for (let r of Object.keys(GACHA_CONFIG.rarities)) stats[r] = history.filter(i => i.rarity === r).length;
-    const modalStats = document.getElementById('modalStats');
-    if (modalStats) {
-        let statsText = '';
-        for (let [rarity, count] of Object.entries(stats)) statsText += `${rarity}: ${count}  |  `;
-        modalStats.innerText = statsText.slice(0, -3) + `  |  Всего: ${history.length}`;
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toastMessage');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.style.background = isError ? 'rgba(100, 50, 50, 0.95)' : 'rgba(0, 0, 0, 0.85)';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
-    const fullHistoryList = document.getElementById('fullHistoryList');
-    if (fullHistoryList) {
-        if (history.length === 0) fullHistoryList.innerHTML = '<div style="padding:12px;text-align:center;color:#aa9e7a;">Пока ничего не выпадало...</div>';
-        else {
-            fullHistoryList.innerHTML = history.map(rec => {
-                const rarityData = GACHA_CONFIG.rarities[rec.rarity];
-                const starIcon = rec.rarity === 'UR' ? '💎' : (rec.rarity === 'SSR' ? '🌟' : (rec.rarity === 'SR' ? '⭐' : '◆'));
-                const gachaIcon = rec.gachaType === 'char' ? '👤' : '⚔️';
-                return `<div class="history-item"><span style="color:${rarityData?.color || '#fff'}">${gachaIcon} ${starIcon} ${rec.name} ${rec.title ? '('+rec.title+')' : ''}</span><span style="color:#bc9a6c;">${rec.timestamp}</span></div>`;
-            }).join('');
-        }
-    }
-}
 
-function getCurrentItems() {
-    return currentGachaType === 'char' ? GACHA_CONFIG.charItems : GACHA_CONFIG.weaponItems;
-}
-
-function getRandomItem(rarity) {
-    const items = getCurrentItems()[rarity];
-    if (!items || items.length === 0) return { name: "Предмет", type: "Предмет", image: "https://picsum.photos/id/1/400/711", rarity: rarity };
-    return { ...items[Math.floor(Math.random() * items.length)], rarity: rarity };
-}
-
-function performWish() {
-    let guaranteedRarity = null;
-    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
-        if (data.guarantee && counters[rarity] <= 1) {
-            guaranteedRarity = rarity;
-            break;
-        }
-    }
-    let result;
-    if (guaranteedRarity) {
-        result = getRandomItem(guaranteedRarity);
-        for (let [r, data] of Object.entries(GACHA_CONFIG.rarities)) if (data.guarantee) counters[r] = data.guarantee;
-    } else {
-        const rand = Math.random() * 100;
-        let cumulative = 0, selectedRarity = null;
+    function updateCountersUI() {
+        const panel = document.getElementById('countersPanel');
+        panel.innerHTML = '';
         for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
-            cumulative += data.chance;
-            if (rand < cumulative) { selectedRarity = rarity; break; }
-        }
-        if (!selectedRarity) selectedRarity = 'R';
-        result = getRandomItem(selectedRarity);
-        for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
-            if (data.guarantee) {
-                if (rarity === selectedRarity) counters[rarity] = data.guarantee;
-                else counters[rarity] = Math.max(1, counters[rarity] - 1);
+            if (data.guarantee && counters[rarity] !== undefined) {
+                panel.innerHTML += `<div class="counter-item"><div class="counter-label">ДО ГАРАНТА ${rarity}</div><div class="counter-value">${counters[rarity]}</div><div class="counter-note">макс. ${data.guarantee}</div></div>`;
             }
         }
     }
-    const historyItem = { ...result, timestamp: new Date().toLocaleTimeString(), gachaType: currentGachaType };
-    history.unshift(historyItem);
-    if (history.length > 90) history.pop();
-    totalPulls++;
-    if (result.type === "Персонаж") { if (!collectedCharacters.includes(result.id)) collectedCharacters.push(result.id); }
-    else if (result.type === "Оружие") { if (!collectedWeapons.includes(result.id)) collectedWeapons.push(result.id); }
-    saveGameData();
-    updateUI();
-    return result;
-}
 
-// ==================== АНИМАЦИИ ====================
-function showSingleResult(item) {
-    const rarityData = GACHA_CONFIG.rarities[item.rarity];
-    document.getElementById('resultContainer').innerHTML = `
-        <div class="result-card result-${item.rarity}">
-            <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
-            <div class="result-name">${item.name}</div>
-            <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
-            <div class="result-type">${item.type}</div>
-            ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
-        </div>
-    `;
-}
-
-function showMultiResult(item) {
-    const rarityData = GACHA_CONFIG.rarities[item.rarity];
-    document.getElementById('resultContainer').innerHTML = `
-        <div class="result-card result-${item.rarity}">
-            <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
-            <div class="result-name">${item.name}</div>
-            <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
-            <div class="result-type">${item.type}</div>
-            ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
-            <div class="result-counter">${currentMultiIndex + 1} / ${currentMultiItems.length}</div>
-        </div>
-    `;
-}
-
-function showAllMultiResults() {
-    showingFinalResults = true;
-    let html = `<div class="final-results-wrapper"><div class="final-results-container"><div class="final-results-grid">`;
-    currentMultiItems.forEach(item => {
-        const rarityData = GACHA_CONFIG.rarities[item.rarity];
-        const rarityClass = `final-${item.rarity.toLowerCase()}`;
-        html += `<div class="final-result-item ${rarityClass}">
-            <img src="${item.image}" class="final-result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='https://picsum.photos/id/1/400/711'">
-            <div class="final-result-name">${item.name}</div>
-            <div class="final-result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
-        </div>`;
-    });
-    html += `</div></div></div>`;
-    document.getElementById('resultContainer').innerHTML = html;
-    document.getElementById('skipButtonOverlay').style.display = 'none';
-}
-
-function nextMultiItem() {
-    if (skipRequested || currentMultiIndex >= currentMultiItems.length) {
-        showAllMultiResults();
-        return;
-    }
-    showMultiResult(currentMultiItems[currentMultiIndex]);
-    currentMultiIndex++;
-}
-
-function startMultiAnimation(items) {
-    currentMultiItems = items;
-    currentMultiIndex = 0;
-    skipRequested = false;
-    isMultiMode = true;
-    showingFinalResults = false;
-    const skipBtn = document.getElementById('skipButtonOverlay');
-    skipBtn.style.display = 'flex';
-    const starsContainer = document.getElementById('starsContainer');
-    starsContainer.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
-        const star = document.createElement('div');
-        star.className = 'star-burst';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 0.3 + 's';
-        starsContainer.appendChild(star);
-    }
-    setTimeout(() => {
-        showMultiResult(currentMultiItems[0]);
-        currentMultiIndex = 1;
-    }, 400);
-}
-
-function startSingleAnimation(item) {
-    isMultiMode = false;
-    showingFinalResults = false;
-    document.getElementById('skipButtonOverlay').style.display = 'none';
-    const starsContainer = document.getElementById('starsContainer');
-    starsContainer.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
-        const star = document.createElement('div');
-        star.className = 'star-burst';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 0.3 + 's';
-        starsContainer.appendChild(star);
-    }
-    setTimeout(() => { showSingleResult(item); }, 400);
-}
-
-function hideAnimationAndFinish() {
-    document.getElementById('wishAnimation').classList.remove('active');
-    document.getElementById('resultContainer').innerHTML = '';
-    document.getElementById('starsContainer').innerHTML = '';
-    document.getElementById('skipButtonOverlay').style.display = 'none';
-    isAnimating = false;
-    isMultiMode = false;
-    showingFinalResults = false;
-    document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.remove('disabled'));
-    currentMultiItems = [];
-    currentMultiIndex = 0;
-    skipRequested = false;
-}
-
-function finishMultiAndSave() {
-    // уже добавлены в историю в performWish, но нужно обновить UI после анимации
-    saveGameData();
-    updateUI();
-    hideAnimationAndFinish();
-}
-
-// Главная функция вызова круток с анимацией
-function doPullsWithAnimation(count) {
-    if (isAnimating) return;
-    const totalCost = count * GACHA_CONFIG.costPerPull;
-    if (currency < totalCost) {
-        alert(`Недостаточно валюты! Нужно ${totalCost} примогемов. У вас ${currency}.`);
-        return;
-    }
-    currency -= totalCost;
-    saveGameData();
-    updateUI();
-
-    const items = [];
-    for (let i = 0; i < count; i++) items.push(performWish()); // уже добавляет в историю, но не обновляет UI до конца анимации
-    isAnimating = true;
-    document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.add('disabled'));
-    document.getElementById('wishAnimation').classList.add('active');
-    if (count === 1) startSingleAnimation(items[0]);
-    else startMultiAnimation(items);
-}
-
-// Клик по оверлею для продолжения (для одиночной и пошаговой)
-document.getElementById('wishAnimation').addEventListener('click', (e) => {
-    if (!isAnimating) return;
-    if (e.target.classList.contains('skip-btn-overlay')) return;
-    if (showingFinalResults) {
-        finishMultiAndSave();
-    } else if (isMultiMode && currentMultiItems.length > 0) {
-        if (currentMultiIndex < currentMultiItems.length) nextMultiItem();
-        else showAllMultiResults();
-    } else if (!isMultiMode) {
-        finishMultiAndSave();
-    }
-});
-
-document.getElementById('skipButtonOverlay').addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!isMultiMode || !isAnimating) return;
-    if (showingFinalResults) return;
-    skipRequested = true;
-    showAllMultiResults();
-});
-
-// ==================== НАВИГАЦИЯ И ОБРАБОТЧИКИ ====================
-document.getElementById('backToHubBtn').addEventListener('click', () => { saveGameData(); window.location.href = "index.html"; });
-document.getElementById('gachaCharBtn').addEventListener('click', () => { currentGachaType = 'char'; saveGameData(); updateUI(); updateDetailsModal(); });
-document.getElementById('gachaWeaponBtn').addEventListener('click', () => { currentGachaType = 'weapon'; saveGameData(); updateUI(); updateDetailsModal(); });
-document.getElementById('pray1Btn').addEventListener('click', () => doPullsWithAnimation(1));
-document.getElementById('pay10Btn').addEventListener('click', () => doPullsWithAnimation(10));
-document.getElementById('openHistoryBtn').addEventListener('click', () => { updateHistoryUI(); document.getElementById('historyModal').classList.add('active'); });
-document.getElementById('openDetailsBtn').addEventListener('click', () => { updateDetailsModal(); document.getElementById('detailsModal').classList.add('active'); });
-document.getElementById('closeHistoryBtn').addEventListener('click', () => document.getElementById('historyModal').classList.remove('active'));
-document.getElementById('closeDetailsBtn').addEventListener('click', () => document.getElementById('detailsModal').classList.remove('active'));
-
-function updateDetailsModal() {
-    const container = document.getElementById('detailsTable');
-    const currentItems = getCurrentItems();
-    let html = `<div class="info-note"><strong>🎯 НАСТРОЙКИ БАННЕРА:</strong><br>• Стоимость 1 молитвы: ${GACHA_CONFIG.costPerPull} примогемов<br>• Гарант SSR: 90 молитв | Гарант SR: 10 молитв<br>• Базовые шансы: UR ${GACHA_CONFIG.rarities.UR.chance}% | SSR ${GACHA_CONFIG.rarities.SSR.chance}% | SR ${GACHA_CONFIG.rarities.SR.chance}% | R ${GACHA_CONFIG.rarities.R.chance}%</div>`;
-    for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
-        const items = currentItems[rarity];
-        if (items && items.length) {
-            html += `<div class="section-title">${data.label} (${rarity}) (${data.chance}%)</div><table class="rates-table"><thead> Utrecht<th>Предмет</th><th>Тип</th><th>Редкость</th> </thead><tbody>`;
-            items.forEach(item => {
-                html += `<tr><td><div style="display:flex;align-items:center;gap:8px"><img src="${item.image}" style="width:36px;height:64px;object-fit:cover;border-radius:8px"> ${item.name} ${item.title ? '('+item.title+')' : ''}</div></td><td>${item.type}</td><td class="rarity-${rarity === 'UR' ? '5-star' : (rarity === 'SSR' ? '5-star' : (rarity === 'SR' ? '4-star' : '3-star'))}">${data.label}</td></tr>`;
-            });
-            html += `</tbody></table>`;
+    function updateHistoryUI() {
+        const stats = {};
+        for (let r of Object.keys(GACHA_CONFIG.rarities)) stats[r] = history.filter(i => i.rarity === r).length;
+        const modalStats = document.getElementById('modalStats');
+        if (modalStats) {
+            let statsText = '';
+            for (let [rarity, count] of Object.entries(stats)) statsText += `${rarity}: ${count}  |  `;
+            modalStats.innerText = statsText.slice(0, -3) + `  |  Всего: ${history.length}`;
+        }
+        const fullHistoryList = document.getElementById('fullHistoryList');
+        if (fullHistoryList) {
+            if (history.length === 0) fullHistoryList.innerHTML = '<div style="padding:12px;text-align:center;color:#aa9e7a;">Пока ничего не выпадало...</div>';
+            else {
+                fullHistoryList.innerHTML = history.map(rec => {
+                    const rarityData = GACHA_CONFIG.rarities[rec.rarity];
+                    const starIcon = rec.rarity === 'UR' ? '💎' : (rec.rarity === 'SSR' ? '🌟' : (rec.rarity === 'SR' ? '⭐' : '◆'));
+                    const gachaIcon = rec.gachaType === 'char' ? '👤' : '⚔️';
+                    return `<div class="history-item"><span style="color:${rarityData?.color || '#fff'}">${gachaIcon} ${starIcon} ${rec.name} ${rec.title ? '('+rec.title+')' : ''}</span><span style="color:#bc9a6c;">${rec.timestamp}</span></div>`;
+                }).join('');
+            }
         }
     }
-    container.innerHTML = html;
-}
 
-document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
-});
+    function getCurrentItems() {
+        return currentGachaType === 'char' ? GACHA_CONFIG.charItems : GACHA_CONFIG.weaponItems;
+    }
 
-loadGameData();
-updateDetailsModal();
+    function getRandomItem(rarity) {
+        const items = getCurrentItems()[rarity];
+        if (!items || items.length === 0) return { name: "Предмет", type: "Предмет", image: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 711'%3E%3Crect width='400' height='711' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFE2B5'%3E%3C/text%3E%3C/svg%3E", rarity: rarity };
+        return { ...items[Math.floor(Math.random() * items.length)], rarity: rarity };
+    }
+
+    function performWish() {
+        let guaranteedRarity = null;
+        if (counters.SSR <= 1) guaranteedRarity = 'SSR';
+        else if (counters.SR <= 1) guaranteedRarity = 'SR';
+
+        let result;
+        if (guaranteedRarity) {
+            result = getRandomItem(guaranteedRarity);
+            if (guaranteedRarity === 'SSR') {
+                counters.SSR = GACHA_CONFIG.rarities.SSR.guarantee;
+                counters.SR = GACHA_CONFIG.rarities.SR.guarantee;
+            } else if (guaranteedRarity === 'SR') {
+                counters.SR = GACHA_CONFIG.rarities.SR.guarantee;
+                counters.SSR = Math.max(1, counters.SSR - 1);
+            }
+        } else {
+            const rand = Math.random() * 100;
+            let cumulative = 0, selectedRarity = null;
+            for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+                cumulative += data.chance;
+                if (rand < cumulative) { selectedRarity = rarity; break; }
+            }
+            if (!selectedRarity) selectedRarity = 'R';
+            result = getRandomItem(selectedRarity);
+            if (selectedRarity === 'SSR' || selectedRarity === 'UR') {
+                counters.SSR = GACHA_CONFIG.rarities.SSR.guarantee;
+                counters.SR = GACHA_CONFIG.rarities.SR.guarantee;
+            } else if (selectedRarity === 'SR') {
+                counters.SR = GACHA_CONFIG.rarities.SR.guarantee;
+                counters.SSR = Math.max(1, counters.SSR - 1);
+            } else {
+                counters.SSR = Math.max(1, counters.SSR - 1);
+                counters.SR = Math.max(1, counters.SR - 1);
+            }
+        }
+
+        const historyItem = { ...result, timestamp: new Date().toLocaleTimeString(), gachaType: currentGachaType };
+        history.unshift(historyItem);
+        if (history.length > 90) history.pop();
+        totalPulls++;
+        if (result.type === "Персонаж") {
+            if (!collectedCharacters.includes(result.id)) collectedCharacters.push(result.id);
+        } else if (result.type === "Оружие") {
+            if (!collectedWeapons.includes(result.id)) collectedWeapons.push(result.id);
+        }
+        saveGameDataAndCloud();
+        updateUI();
+        return result;
+    }
+
+    function showSingleResult(item) {
+        const rarityData = GACHA_CONFIG.rarities[item.rarity];
+        document.getElementById('resultContainer').innerHTML = `
+            <div class="result-card result-${item.rarity}">
+                <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 711'%3E%3Crect width='400' height='711' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFE2B5'%3E%3C/text%3E%3C/svg%3E'">
+                <div class="result-name">${item.name}</div>
+                <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+                <div class="result-type">${item.type}</div>
+                ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
+            </div>
+        `;
+    }
+
+    function showMultiResult(item) {
+        const rarityData = GACHA_CONFIG.rarities[item.rarity];
+        document.getElementById('resultContainer').innerHTML = `
+            <div class="result-card result-${item.rarity}">
+                <img src="${item.image}" class="result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 711'%3E%3Crect width='400' height='711' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFE2B5'%3E%3C/text%3E%3C/svg%3E'">
+                <div class="result-name">${item.name}</div>
+                <div class="result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+                <div class="result-type">${item.type}</div>
+                ${item.title ? `<div class="result-type">${item.title}</div>` : ''}
+                <div class="result-counter">${currentMultiIndex + 1} / ${currentMultiItems.length}</div>
+            </div>
+        `;
+    }
+
+    function showAllMultiResults() {
+        showingFinalResults = true;
+        let html = `<div class="final-results-wrapper"><div class="final-results-container"><div class="final-results-grid">`;
+        currentMultiItems.forEach(item => {
+            const rarityData = GACHA_CONFIG.rarities[item.rarity];
+            const rarityClass = `final-${item.rarity.toLowerCase()}`;
+            html += `<div class="final-result-item ${rarityClass}">
+                <img src="${item.image}" class="final-result-image" style="border-color:${rarityData?.color || '#7f8c8d'}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 711'%3E%3Crect width='400' height='711' fill='%23333'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23FFE2B5'%3E%3C/text%3E%3C/svg%3E'">
+                <div class="final-result-name">${item.name}</div>
+                <div class="final-result-rarity" style="color:${rarityData?.color || '#fff'}">${rarityData?.label || 'R'}</div>
+            </div>`;
+        });
+        html += `</div></div></div>`;
+        document.getElementById('resultContainer').innerHTML = html;
+        document.getElementById('skipButtonOverlay').style.display = 'none';
+    }
+
+    function nextMultiItem() {
+        if (skipRequested || currentMultiIndex >= currentMultiItems.length) {
+            showAllMultiResults();
+            return;
+        }
+        showMultiResult(currentMultiItems[currentMultiIndex]);
+        currentMultiIndex++;
+    }
+
+    function startMultiAnimation(items) {
+        currentMultiItems = items;
+        currentMultiIndex = 0;
+        skipRequested = false;
+        isMultiMode = true;
+        showingFinalResults = false;
+        const skipBtn = document.getElementById('skipButtonOverlay');
+        skipBtn.style.display = 'flex';
+        const starsContainer = document.getElementById('starsContainer');
+        starsContainer.innerHTML = '';
+        for (let i = 0; i < 12; i++) {
+            const star = document.createElement('div');
+            star.className = 'star-burst';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 0.3 + 's';
+            starsContainer.appendChild(star);
+        }
+        setTimeout(() => {
+            showMultiResult(currentMultiItems[0]);
+            currentMultiIndex = 1;
+        }, 400);
+    }
+
+    function startSingleAnimation(item) {
+        isMultiMode = false;
+        showingFinalResults = false;
+        document.getElementById('skipButtonOverlay').style.display = 'none';
+        const starsContainer = document.getElementById('starsContainer');
+        starsContainer.innerHTML = '';
+        for (let i = 0; i < 12; i++) {
+            const star = document.createElement('div');
+            star.className = 'star-burst';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 0.3 + 's';
+            starsContainer.appendChild(star);
+        }
+        setTimeout(() => { showSingleResult(item); }, 400);
+    }
+
+    function hideAnimationAndFinish() {
+        document.getElementById('wishAnimation').classList.remove('active');
+        document.getElementById('resultContainer').innerHTML = '';
+        document.getElementById('starsContainer').innerHTML = '';
+        document.getElementById('skipButtonOverlay').style.display = 'none';
+        isAnimating = false;
+        isMultiMode = false;
+        showingFinalResults = false;
+        document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.remove('disabled'));
+        currentMultiItems = [];
+        currentMultiIndex = 0;
+        skipRequested = false;
+    }
+
+    function finishMultiAndSave() {
+        saveGameDataAndCloud();
+        updateUI();
+        hideAnimationAndFinish();
+    }
+
+    function doPullsWithAnimation(count) {
+        if (isAnimating) return;
+        const totalCost = count * GACHA_CONFIG.costPerPull;
+        if (currency < totalCost) {
+            showToast(`❌ Недостаточно ${currencyName}! Нужно ${totalCost}. У вас ${currency}.`, true);
+            return;
+        }
+        currency -= totalCost;
+        saveGameDataAndCloud();
+        updateUI();
+
+        const items = [];
+        for (let i = 0; i < count; i++) items.push(performWish());
+        isAnimating = true;
+        document.querySelectorAll('.pray-btn').forEach(btn => btn.classList.add('disabled'));
+        document.getElementById('wishAnimation').classList.add('active');
+        if (count === 1) startSingleAnimation(items[0]);
+        else startMultiAnimation(items);
+    }
+
+    document.getElementById('wishAnimation').addEventListener('click', (e) => {
+        if (!isAnimating) return;
+        if (e.target.classList.contains('skip-btn-overlay')) return;
+        if (showingFinalResults) {
+            finishMultiAndSave();
+        } else if (isMultiMode && currentMultiItems.length > 0) {
+            if (currentMultiIndex < currentMultiItems.length) nextMultiItem();
+            else showAllMultiResults();
+        } else if (!isMultiMode) {
+            finishMultiAndSave();
+        }
+    });
+
+    document.getElementById('skipButtonOverlay').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isMultiMode || !isAnimating) return;
+        if (showingFinalResults) return;
+        skipRequested = true;
+        showAllMultiResults();
+    });
+
+    document.getElementById('backToHubBtn').addEventListener('click', () => { saveGameDataAndCloud(); window.location.href = "index.html"; });
+    document.getElementById('gachaCharBtn').addEventListener('click', () => { currentGachaType = 'char'; saveGameDataAndCloud(); updateUI(); updateDetailsModal(); });
+    document.getElementById('gachaWeaponBtn').addEventListener('click', () => { currentGachaType = 'weapon'; saveGameDataAndCloud(); updateUI(); updateDetailsModal(); });
+    document.getElementById('pray1Btn').addEventListener('click', () => doPullsWithAnimation(1));
+    document.getElementById('pay10Btn').addEventListener('click', () => doPullsWithAnimation(10));
+    document.getElementById('openHistoryBtn').addEventListener('click', () => { updateHistoryUI(); document.getElementById('historyModal').classList.add('active'); });
+    document.getElementById('openDetailsBtn').addEventListener('click', () => { updateDetailsModal(); document.getElementById('detailsModal').classList.add('active'); });
+    document.getElementById('closeHistoryBtn').addEventListener('click', () => document.getElementById('historyModal').classList.remove('active'));
+    document.getElementById('closeDetailsBtn').addEventListener('click', () => document.getElementById('detailsModal').classList.remove('active'));
+
+    function updateDetailsModal() {
+        const container = document.getElementById('detailsTable');
+        const currentItems = getCurrentItems();
+        let html = `<div class="info-note"><strong>🎯 НАСТРОЙКИ БАННЕРА:</strong><br>• Стоимость 1 призыва: ${GACHA_CONFIG.costPerPull} ${currencyName}<br>• Гарант SSR: 90 призывов | Гарант SR: 10 призывов<br>• Базовые шансы: UR ${GACHA_CONFIG.rarities.UR.chance}% | SSR ${GACHA_CONFIG.rarities.SSR.chance}% | SR ${GACHA_CONFIG.rarities.SR.chance}% | R ${GACHA_CONFIG.rarities.R.chance}%</div>`;
+        for (let [rarity, data] of Object.entries(GACHA_CONFIG.rarities)) {
+            const items = currentItems[rarity];
+            if (items && items.length) {
+                html += `<div class="section-title">${data.label} (${rarity}) (${data.chance}%)</div><table class="rates-table"><thead><th>Предмет</th><th>Тип</th><th>Редкость</th></thead><tbody>`;
+                items.forEach(item => {
+                    html += `}<tr><td><div style="display:flex;align-items:center;gap:8px"><img src="${item.image}" style="width:36px;height:64px;object-fit:cover;border-radius:8px"> ${item.name} ${item.title ? '('+item.title+')' : ''}</div></td><td>${item.type}</td><td class="rarity-${rarity === 'UR' ? '5-star' : (rarity === 'SSR' ? '5-star' : (rarity === 'SR' ? '4-star' : '3-star'))}">${data.label}</td></tr>`;
+                });
+                html += `</tbody></table>`;
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+    });
+
+    // ========== ЗАПУСК ==========
+    loadGameDataSync();
+    initSDK();
 </script>
 </body>
 </html>

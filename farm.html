@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Фарм | Genshin Impact</title>
+    <title>Добыча осколков</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
 
         body {
             min-height: 100vh;
-            background: url('https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=1920&h=1080&fit=crop') center/cover no-repeat fixed;
+            background: #0a1a2a;
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
             position: relative;
         }
@@ -26,7 +26,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.55);
+            background: linear-gradient(135deg, #1a2a3a, #0a121c);
             pointer-events: none;
             z-index: 0;
         }
@@ -38,17 +38,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px; /* уменьшил отступы */
+            padding: 20px;
         }
 
         .farm-card {
             position: relative;
             width: 100%;
-            max-width: 700px; /* чуть уже */
+            max-width: 700px;
             background: rgba(10, 20, 30, 0.75);
             backdrop-filter: blur(16px);
             border-radius: 40px;
-            padding: 20px 15px; /* уменьшил внутренние отступы */
+            padding: 20px 15px;
             border: 1px solid rgba(255, 215, 150, 0.5);
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
             text-align: center;
@@ -56,7 +56,7 @@
 
         .top-bar {
             position: fixed;
-            top: 20px; /* чуть выше */
+            top: 20px;
             left: 0;
             right: 0;
             display: flex;
@@ -114,7 +114,10 @@
         }
         
         .currency-icon {
-            font-size: 1rem;
+            width: 1.4rem;
+            height: 1.4rem;
+            display: inline-block;
+            vertical-align: middle;
         }
         
         .currency-amount {
@@ -124,7 +127,7 @@
         }
 
         .click-area {
-            margin: 15px auto; /* уменьшил отступ */
+            margin: 15px auto;
             cursor: pointer;
             transition: transform 0.1s ease;
             width: fit-content;
@@ -136,7 +139,7 @@
         
         .click-image {
             width: 100%;
-            max-width: 200px; /* уменьшил размер */
+            max-width: 200px;
             aspect-ratio: 9 / 16;
             object-fit: cover;
             border-radius: 24px;
@@ -154,7 +157,7 @@
         .info-panel {
             background: rgba(0, 0, 0, 0.6);
             border-radius: 32px;
-            padding: 12px 15px; /* уменьшил отступы */
+            padding: 12px 15px;
             margin-top: 15px;
         }
         
@@ -174,6 +177,37 @@
             font-size: 0.8rem;
             color: #b9cfec;
             margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            background: radial-gradient(ellipse at 30% 30%, rgba(46, 63, 78, 0.95), rgba(18, 31, 43, 0.95));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 100, 0.6);
+            padding: 8px 16px;
+            border-radius: 60px;
+            color: #FFE2B5;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            background: radial-gradient(ellipse at 30% 30%, rgba(66, 93, 108, 0.95), rgba(28, 45, 58, 0.95));
+            border-color: #ffcd7e;
         }
         
         .toast-message {
@@ -206,6 +240,7 @@
             .currency-amount { font-size: 0.9rem; }
             .top-bar { padding: 0 15px; top: 15px; }
             .farm-card { max-width: 90%; padding: 15px 10px; }
+            .action-btn { padding: 6px 12px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -213,50 +248,130 @@
     <div class="farm-container">
         <div class="farm-card">
             <div class="click-area" id="clickArea">
-                <img src="https://static.wikia.nocookie.net/genshin-impact/images/a/ac/Персонаж_Паймон_Карточка.png/revision/latest?cb=20240329163432&path-prefix=ru" 
-                     alt="Хиличурл" 
-                     class="click-image"
-                     onerror="this.src='https://picsum.photos/id/104/360/640'">
+                <img src="./images/ui/crystal.png" 
+                     alt="Кристалл призыва" 
+                     class="click-image">
             </div>
-            <div class="info-panel">
-                <div class="info-text">✨ КЛИКАЙ ПО ПАЙМОН ✨</div>
-                <div class="click-counter" id="sessionClicks">0</div>
-                <div class="reward-text">+30 примогемов за клик</div>
-                <div class="reward-text">100 кликов = 10 круток (3000 примогемов)</div>
+            <div class="info-text" data-i18n="click_hint">✨ КЛИКАЙ ПО КРИСТАЛЛУ И ПОЛУЧАЙ ОСКОЛКИ ✨</div>
+            <div class="reward-text" data-i18n="reward_per_click">+30 осколков за клик</div>
+            <div class="reward-text" data-i18n="reward_summary">100 кликов = 10 круток (3000 осколков)</div>
+            <div class="action-buttons">
+                <button class="action-btn" id="autoClickerBtn" data-i18n="auto_clicker_btn">⚡ АВТОКЛИКЕР 60 СЕК (реклама)</button>
+                <div class="reward-text" data-i18n="auto_clicker_hint">Автокликер на 60 секунд за просмотр рекламы</div>
             </div>
         </div>
     </div>
 
     <div class="top-bar">
         <div class="top-left-group">
-            <button class="back-btn" id="backToHubBtn">← НАЗАД</button>
+            <button class="back-btn" id="backToHubBtn" data-i18n="back_btn">← НАЗАД</button>
         </div>
         <div class="currency-display">
-            <span class="currency-icon">⭐</span>
-            <span class="currency-amount" id="currencyAmount">10000</span>
-            <span>Примогемы</span>
+            <img src="./images/ui/crystal_icon.png" class="currency-icon" alt="Эссенция">
+            <span class="currency-amount" id="currencyAmount">0</span>
+            <span class="currency-label">Осколки</span>
         </div>
     </div>
 
     <div id="toastMessage" class="toast-message"></div>
 
+    <script async src="/sdk.js" onload="initSDK()"></script>
     <script>
-        const STORAGE_KEY = 'genshin_game_data';
-        let currency = 10000;
+        // ========== КОНФИГУРАЦИЯ ==========
+        // Ключ сохранения (уникальный, без отсылок)
+        const STORAGE_KEY = 'avokadka_game_data';
+
+        // Локализация (русский и английский)
+        const LOCALE_STRINGS = {
+            ru: {
+                click_hint: "✨ КЛИКАЙ ПО КРИСТАЛЛУ И ПОЛУЧАЙ ОСКОЛКИ ✨",
+                reward_per_click: "+30 осколков за клик",
+                reward_summary: "100 кликов = 10 круток (3000 осколков)",
+                auto_clicker_btn: "⚡ АВТОКЛИКЕР 60 СЕК (реклама)",
+                auto_clicker_hint: "Автокликер на 60 секунд за просмотр рекламы",
+                back_btn: "← НАЗАД"
+            },
+            en: {
+                click_hint: "✨ CLICK THE CRYSTAL TO GET SHARDS ✨",
+                reward_per_click: "+30 shards per click",
+                reward_summary: "100 clicks = 10 wishes (3000 shards)",
+                auto_clicker_btn: "⚡ AUTO-CLICKER 60 SEC (ad)",
+                auto_clicker_hint: "Auto-clicker for 60 seconds after watching an ad",
+                back_btn: "← BACK"
+            }
+        };
+
+        let currency = 0;
         let sessionClicks = 0;
-        
+        let ysdk = null;
+        let autoClickerInterval = null;
+        let isAutoClicking = false;
+        let lastClickTime = 0;
+        let currentLocale = 'ru';
+        let currencyName = "Осколки";
+
+        const MIN_CLICK_DELAY = 100; // минимальная задержка между кликами (100 мс)
+
+        // ========== ИНИЦИАЛИЗАЦИЯ SDK ==========
+        async function initSDK() {
+            try {
+                ysdk = await YaGames.init();
+                // Определяем язык
+                const lang = ysdk.environment.i18n.lang;
+                if (lang && LOCALE_STRINGS[lang]) {
+                    currentLocale = lang;
+                } else {
+                    currentLocale = 'ru';
+                }
+                applyLocale(currentLocale);
+
+                // Получаем название валюты через SDK
+                try {
+                    const currencyInfo = ysdk.getCurrency();
+                    if (currencyInfo && currencyInfo.name) {
+                        currencyName = currencyInfo.name;
+                    }
+                } catch(e) {}
+                updateCurrencyNameDisplay();
+
+                ysdk.features.LoadingAPI?.ready();
+            } catch(e) {
+                console.warn('SDK init failed:', e);
+            }
+            // Загружаем данные после инициализации
+            loadGameData();
+        }
+
+        function applyLocale(locale) {
+            const strings = LOCALE_STRINGS[locale] || LOCALE_STRINGS.ru;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (strings[key] !== undefined) {
+                    el.innerHTML = strings[key];
+                }
+            });
+        }
+
+        function updateCurrencyNameDisplay() {
+            document.querySelectorAll('.currency-label').forEach(el => {
+                el.textContent = currencyName;
+            });
+        }
+
+        // ========== РАБОТА С ДАННЫМИ ==========
         function loadGameData() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    currency = data.currency ?? 10000;
+                    currency = data.currency ?? 0;
                 } catch(e) {}
             }
             updateCurrencyUI();
         }
-        
+
         function saveGameData() {
+            // Сохраняем только валюту, остальные данные оставляем без изменений
             let fullData = {};
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -265,31 +380,107 @@
             fullData.currency = currency;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(fullData));
         }
-        
+
+        // Вызываем сохранение и, если доступно, синхронизацию с облаком
+        function saveAndSync() {
+            saveGameData();
+            // Если на главной странице определена функция облачного сохранения, вызываем её
+            if (typeof window.saveToCloud === 'function') {
+                window.saveToCloud();
+            }
+        }
+
         function updateCurrencyUI() {
             document.getElementById('currencyAmount').innerText = currency;
         }
-        
+
+        // ========== ОСНОВНАЯ МЕХАНИКА ==========
         function handleClick() {
+            const now = Date.now();
+            if (now - lastClickTime < MIN_CLICK_DELAY) return;
+            lastClickTime = now;
+            
             currency += 30;
             sessionClicks++;
             updateCurrencyUI();
-            saveGameData();
-            document.getElementById('sessionClicks').innerText = sessionClicks;
-            showToast(`+30 примогемов! (Всего: ${currency})`);
+            saveAndSync();
+            
+            // Обновляем счётчик сессии, если есть элемент
+            const counterEl = document.getElementById('sessionClicks');
+            if (counterEl) counterEl.innerText = sessionClicks;
+            
+            showToast(`+30 ${currencyName}! (Всего: ${currency})`);
         }
-        
-        function showToast(message) {
+
+        function showToast(message, isError = false) {
             const toast = document.getElementById('toastMessage');
             toast.textContent = message;
+            toast.style.background = isError ? 'rgba(100, 50, 50, 0.95)' : 'rgba(0, 0, 0, 0.85)';
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 1500);
         }
-        
+
+        // ========== АВТОКЛИКЕР (реклама) ==========
+        async function startAutoClicker() {
+            if (isAutoClicking) {
+                showToast("Автокликер уже работает!");
+                return;
+            }
+            if (!ysdk) {
+                showToast("SDK не загружен, попробуйте позже", true);
+                return;
+            }
+            try {
+                // Показываем rewarded video
+                await ysdk.adv.showRewardedVideo({
+                    callbacks: {
+                        onOpen: () => {
+                            console.log("Rewarded video opened");
+                        },
+                        onReward: () => {
+                            // Награда: автокликер на 60 секунд
+                            startAutoClickerTimer();
+                        },
+                        onClose: () => {
+                            console.log("Rewarded video closed");
+                        },
+                        onError: (err) => {
+                            console.error("Rewarded video error:", err);
+                            showToast("Не удалось показать рекламу", true);
+                        }
+                    }
+                });
+            } catch(e) {
+                console.error("Failed to show rewarded video:", e);
+                showToast("Ошибка показа рекламы", true);
+            }
+        }
+
+        function startAutoClickerTimer() {
+            if (isAutoClicking) return;
+            isAutoClicking = true;
+            showToast("Автокликер активирован на 60 секунд!");
+            autoClickerInterval = setInterval(() => {
+                handleClick();
+            }, MIN_CLICK_DELAY);
+            setTimeout(() => {
+                if (autoClickerInterval) {
+                    clearInterval(autoClickerInterval);
+                    autoClickerInterval = null;
+                    isAutoClicking = false;
+                    showToast("Автокликер завершил работу");
+                    saveAndSync(); // финальное сохранение
+                }
+            }, 60000);
+        }
+
+        // ========== ОБРАБОТЧИКИ ==========
         document.getElementById('backToHubBtn').addEventListener('click', () => {
-            saveGameData();
+            saveAndSync();
             window.location.href = "index.html";
         });
+        
+        document.getElementById('autoClickerBtn').addEventListener('click', startAutoClicker);
         
         const clickArea = document.getElementById('clickArea');
         clickArea.addEventListener('click', handleClick);
@@ -298,9 +489,11 @@
             handleClick();
         });
         
+        // Инициализация (данные загружаются в initSDK)
+        // Но чтобы не ждать SDK, можно подгрузить данные сразу
         loadGameData();
         document.getElementById('sessionClicks').innerText = sessionClicks;
-        window.addEventListener('beforeunload', () => saveGameData());
+        window.addEventListener('beforeunload', () => saveAndSync());
     </script>
 </body>
 </html>
